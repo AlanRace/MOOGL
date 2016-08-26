@@ -1,33 +1,70 @@
 classdef Image < Data
-    properties (SetAccess = private)
+    % Image Class for storing image data.
+    
+    properties (SetObservable) 
+        % 2D matrix for image data
         imageData;
     end
     
     methods
-        function obj = Image(imageData)
-%             warning('Image:TODO', 'TODO: Check that the data is 2 dimensional');
+        function this = Image(imageData)
+            % SpectralData Constructor for Image.
+            %
+            %   Image(imageData)
+            %       imageData    - 2D matrix for image data.
             
-            obj.imageData = imageData;
+            this.imageData = imageData;
+            
+            addlistener(this, 'imageData', 'PostSet', @(src, evnt) notify(this, 'DataChanged'));
         end
         
         function width = getWidth(this)
+            % getWidth Get width of image in pixels.
+            %
+            %   width = getWidth()
+            %       width - Width in pixels.
+            
             width = size(this.imageData, 2);
         end
         
         function height = getHeight(this)
+            % getHeight Get height of image in pixels.
+            %
+            %   height = getHeight()
+            %       height - Height in pixels.
+            
             height = size(this.imageData, 1);
         end
         
-        function imageData = normalisedTo(this, value)
-            imageData = (this.imageData ./ max(this.imageData(:))) * value;
+        function rescaleTo(this, value)
+            % rescaleTo Rescale the image data to be between 0 and value.
+            %
+            %   rescaleTo(value)
+            %       value - Maximum value to rescale to.
+            
+            this.imageData = (this.imageData ./ max(this.imageData(:))) * value;
         end
         
-        function exportToImage(obj)
-            warning('TODO: Add functionality');
+         function exportToImage(this)
+            % exportToImage Export this object to an image file.
+            %
+            %   exportToImage()
+            
+            throw(UnimplementedMethodException('Image.exportToImage()'));
         end
         
-        function exportToLaTeX(obj)
-            warning('TODO: Add functionality');
+        function exportToLaTeX(this)
+            % exportToLaTeX Export this object to a LaTeX compatible file.
+            %
+            %   exportToLaTeX()
+            
+            throw(UnimplementedMethodException('Image.exportToLaTeX()'));
+        end
+    end
+    
+    methods (Static)
+        function normalisedImage = normaliseTo(image, value)
+            throw(UnimplementedMethodException('Image.normaliseTo() - This method is being removed.'));
         end
     end
 end
