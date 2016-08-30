@@ -11,7 +11,7 @@ classdef PixelSelection < Copyable
     
     methods
         function this = PixelSelection(width, height)
-            error('PixelSelection:Deprecated', 'DEPRECATED');
+            error('PixelSelection:Deprecated', 'DEPRECATED: replace with RegionOfInterest');
             if(~isnumeric(width) || ~isnumeric(height))
                 exception = MException('PixelSelection:InvalidArgument', 'Must supply width and height as integers.');
                 throw(exception);
