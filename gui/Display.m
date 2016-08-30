@@ -1,6 +1,8 @@
 classdef Display < handle
     properties (SetAccess = private)
         data;
+        
+        parent;
         axisHandle;
     end
     
@@ -17,13 +19,23 @@ classdef Display < handle
     end
     
     methods
-        function obj = Display(axisHandle, data)
-            if(isempty(axisHandle) || ~(ishandle(axisHandle) && strcmp(get(axisHandle, 'Type'), 'axes')))
-                exception = MException('Display:invalidArgument', '''axisHandle'' must be a valid axes handle');
+        function obj = Display(parent, data)
+%             if(isempty(axisHandle) || ~(ishandle(axisHandle) && strcmp(get(axisHandle, 'Type'), 'axes')))
+
+            if(isempty(parent) || (~isa(parent, 'Figure') && ~isa(parent, 'Panel')))
+                exception = MException('Display:invalidArgument', '''parent'' must be a valid instance of Figure or Panel');
                 throw(exception);
             end
             
-            obj.axisHandle = axisHandle;
+            obj.parent = parent;
+            
+            if(isa(parent, 'Figure'))
+                parentHandle = parent.figureHandle;
+            else
+                parentHandle = parent.panelHandle;
+            end
+            
+            obj.axisHandle = axes('Parent', parentHandle);
             
             obj.setData(data);
             
@@ -55,8 +67,14 @@ classdef Display < handle
         end
         
         function createContextMenu(obj)
+            if(isa(obj.parent, 'Figure'))
+                parentHandle = obj.parent.figureHandle;
+            else
+                parentHandle = obj.parent.panelHandle;
+            end
+            
             % Set up the context menu
-            obj.contextMenu = uicontextmenu();
+            obj.contextMenu = uicontextmenu('Parent', parentHandle);
             openInNewWindow = uimenu(obj.contextMenu, 'Label', 'Open in new window', 'Callback', @(src,evnt)obj.openInNewWindow());
             openCopyInNewWindow = uimenu(obj.contextMenu, 'Label', 'Open copy in new window', 'Callback', @(src,evnt)obj.openCopyInNewWindow());
             obj.exportMenu = uimenu(obj.contextMenu, 'Label', 'Export Data', 'Callback', []);

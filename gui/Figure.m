@@ -13,6 +13,9 @@ classdef Figure < handle
         FigureClosed;
         % Triggered when an information message is created
         InfoMessage;
+        
+        WindowButtonMotion;
+        WindowButtonUp;
     end
     
     methods
@@ -74,7 +77,9 @@ classdef Figure < handle
                     'Units','characters',...
                     'MenuBar','none',...
                     'Toolbar','none', ...
-                    'CloseRequestFcn', @(src, evnt)this.closeRequest());
+                    'CloseRequestFcn', @(src, evnt)this.closeRequest(), ...
+                    'WindowButtonMotionFcn', @(src, evnt)this.windowButtonMotion(), ...
+                    'WindowButtonUpFcn', @(src, evnt)this.windowButtonUp());
                 
                 % Set the callback for when the window is resized
                 if(isprop(this.figureHandle, 'SizeChangedFcn'))
@@ -85,6 +90,14 @@ classdef Figure < handle
             end
             
             this.createMenu();
+        end
+        
+        function windowButtonMotion(this)
+            notify(this, 'WindowButtonMotion');
+        end
+        
+        function windowButtonUp(this)
+            notify(this, 'WindowButtonUp');
         end
         
         function createMenu(this)

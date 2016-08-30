@@ -36,8 +36,8 @@ classdef SpectrumDisplay < Display
     end
         
     methods
-        function obj = SpectrumDisplay(axisHandle, spectrum)
-            obj = obj@Display(axisHandle, spectrum);
+        function obj = SpectrumDisplay(parent, spectrum)
+            obj = obj@Display(parent, spectrum);
             
             if(~isa(spectrum, 'SpectralData'))
                 exception = MException('SpectrumDisplay:invalidArgument', 'Must provide an instance of a class that extends SpectralData');
@@ -45,8 +45,8 @@ classdef SpectrumDisplay < Display
             end
             
             % Set up the mouse motion and button callbacks for zooming
-            set(get(obj.axisHandle, 'Parent'), 'WindowButtonMotionFcn', @(src,evnt)obj.mouseMovedCallback());
-            set(get(obj.axisHandle, 'Parent'), 'WindowButtonUpFcn', @(src, evnt)obj.mouseButtonUpCallback());
+%             set(get(obj.axisHandle, 'Parent'), 'WindowButtonMotionFcn', @(src,evnt)obj.mouseMovedCallback());
+%             set(get(obj.axisHandle, 'Parent'), 'WindowButtonUpFcn', @(src, evnt)obj.mouseButtonUpCallback());
             
 %             obj.updateDisplay();
         end
@@ -58,13 +58,13 @@ classdef SpectrumDisplay < Display
             
             labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
             
-            [obj.peakDetectionMethods classNames] = getSubclasses('SpectralPeakDetection', 1);
-            
-            for i = 1:length(classNames)
-                obj.peakDetectionMenuItem(i) = uimenu(labelPeaks, 'Label', classNames{i}, 'Callback', @(src, evnt)obj.labelPeaksWithMethod(i));
-            end
-            
-            set(obj.peakDetectionMenuItem(1), 'Checked', 'on');
+%            [obj.peakDetectionMethods classNames] = getSubclasses('SpectralPeakDetection', 1);
+%             
+%             for i = 1:length(classNames)
+%                 obj.peakDetectionMenuItem(i) = uimenu(labelPeaks, 'Label', classNames{i}, 'Callback', @(src, evnt)obj.labelPeaksWithMethod(i));
+%             end
+%             
+%             set(obj.peakDetectionMenuItem(1), 'Checked', 'on');
         end
         
         function exportToCSV(obj)
@@ -390,7 +390,7 @@ classdef SpectrumDisplay < Display
     methods (Access = protected)
         
         function plotSpectrum(this)
-            if(this.data.isProfile)
+            if(~this.data.isContinuous)
                 this.plotHandle = bar(this.axisHandle, this.data.spectralChannels, this.data.intensities, 'k');
             else
                 this.plotHandle = plot(this.axisHandle, this.data.spectralChannels, this.data.intensities);
