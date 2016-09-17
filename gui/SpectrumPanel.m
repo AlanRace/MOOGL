@@ -13,7 +13,7 @@ classdef SpectrumPanel < Panel
     methods(Access = protected)       
         function createPanel(this)
             createPanel@Panel(this);
-                        
+            
             this.spectrumDisplay = SpectrumDisplay(this, SpectralData(1:100, rand(1,100)));
         end
     end

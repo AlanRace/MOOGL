@@ -127,7 +127,7 @@ classdef PixelSelectionPanel < handle
             axes(this.axisHandle);
             
             if(~isempty(this.backgroundImage))
-                bgImage = imagesc(this.backgroundImage);
+                bgImage = imagesc(this.backgroundImage.imageData);
                 colormap gray;
                 
                 hold(this.axisHandle, 'on');

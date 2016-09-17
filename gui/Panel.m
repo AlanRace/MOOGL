@@ -35,7 +35,7 @@ classdef Panel < handle
                 parentHandle = this.parent.panelHandle;
             end
             
-            uipanel(parentHandle);
+            this.panelHandle = uipanel(parentHandle);
         end
         
         function windowButtonMotion(this)

@@ -45,6 +45,10 @@ classdef Image < Data
             this.imageData = (this.imageData ./ max(this.imageData(:))) * value;
         end
         
+        function normalisedImage = normalisedTo(this, value)
+            normalisedImage = Image(this.imageData ./ value);
+        end
+        
          function exportToImage(this)
             % exportToImage Export this object to an image file.
             %
@@ -59,12 +63,6 @@ classdef Image < Data
             %   exportToLaTeX()
             
             throw(UnimplementedMethodException('Image.exportToLaTeX()'));
-        end
-    end
-    
-    methods (Static)
-        function normalisedImage = normaliseTo(image, value)
-            throw(UnimplementedMethodException('Image.normaliseTo() - This method is being removed.'));
         end
     end
 end
