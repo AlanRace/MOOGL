@@ -459,7 +459,9 @@ classdef SpectrumDisplay < Display
             xPoint = currentPoint(1, 1);
             yPoint = currentPoint(1, 2);
             
-            mouseClick = get(get(obj.axisHandle, 'Parent'), 'SelectionType');
+            figureHandle = obj.parent.getParentFigure().figureHandle;
+            
+            mouseClick = get(figureHandle, 'SelectionType');
             
             if(strcmp(mouseClick, 'normal')) % Left click
                 obj.startPoint = [xPoint yPoint];

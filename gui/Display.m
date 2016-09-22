@@ -70,7 +70,7 @@ classdef Display < handle
             if(isa(obj.parent, 'Figure'))
                 parentHandle = obj.parent.figureHandle;
             else
-                parentHandle = obj.parent.panelHandle;
+                parentHandle = obj.parent.getParentFigure().figureHandle;
             end
             
             % Set up the context menu

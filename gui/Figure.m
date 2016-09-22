@@ -62,7 +62,9 @@ classdef Figure < handle
             this.delete();
         end
         
-        
+        function figure = getParentFigure(this)
+            figure = this;
+        end
     end
     
     methods (Access = protected)

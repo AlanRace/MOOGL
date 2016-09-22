@@ -25,6 +25,14 @@ classdef Panel < handle
             
             this.createPanel();
         end
+        
+        function figure = getParentFigure(this)
+            if(isa(this.parent, 'Figure'))
+                figure = this.parent;
+            else
+                figure = this.parent.getParentFigure();
+            end
+        end
     end
     
     methods(Access = protected)
@@ -35,7 +43,7 @@ classdef Panel < handle
                 parentHandle = this.parent.panelHandle;
             end
             
-            uipanel(parentHandle);
+            this.panelHandle = uipanel(parentHandle);
         end
         
         function windowButtonMotion(this)
