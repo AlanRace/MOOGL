@@ -67,11 +67,7 @@ classdef Display < handle
         end
         
         function createContextMenu(obj)
-            if(isa(obj.parent, 'Figure'))
-                parentHandle = obj.parent.figureHandle;
-            else
-                parentHandle = obj.parent.getParentFigure().figureHandle;
-            end
+            parentHandle = obj.parent.getParentFigure().handle;
             
             % Set up the context menu
             obj.contextMenu = uicontextmenu('Parent', parentHandle);

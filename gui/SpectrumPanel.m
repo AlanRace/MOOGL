@@ -5,16 +5,16 @@ classdef SpectrumPanel < Panel
     end
     
     methods
-        function this = SpectrumPanel(parent)
+        function this = SpectrumPanel(parent, spectrum)
             this = this@Panel(parent);
+            
+            this.spectrumDisplay = SpectrumDisplay(this, spectrum);
         end
     end
     
     methods(Access = protected)       
         function createPanel(this)
             createPanel@Panel(this);
-            
-            this.spectrumDisplay = SpectrumDisplay(this, SpectralData(1:100, rand(1,100)));
         end
     end
 end

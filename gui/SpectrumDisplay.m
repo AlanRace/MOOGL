@@ -45,6 +45,9 @@ classdef SpectrumDisplay < Display
             end
             
             % Set up the mouse motion and button callbacks for zooming
+            addlistener(parent, 'ButtonDown', @(src, evnt)obj.buttonDownCallback());
+            addlistener(parent, 'ButtonMotion', @(src,evnt)obj.mouseMovedCallback());
+            addlistener(parent, 'ButtonUp', @(src, evnt)obj.mouseButtonUpCallback());
 %             set(get(obj.axisHandle, 'Parent'), 'WindowButtonMotionFcn', @(src,evnt)obj.mouseMovedCallback());
 %             set(get(obj.axisHandle, 'Parent'), 'WindowButtonUpFcn', @(src, evnt)obj.mouseButtonUpCallback());
             
@@ -459,7 +462,7 @@ classdef SpectrumDisplay < Display
             xPoint = currentPoint(1, 1);
             yPoint = currentPoint(1, 2);
             
-            figureHandle = obj.parent.getParentFigure().figureHandle;
+            figureHandle = obj.parent.getParentFigure().handle;
             
             mouseClick = get(figureHandle, 'SelectionType');
             

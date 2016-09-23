@@ -1,14 +1,7 @@
-classdef Panel < handle
+classdef Panel < Container
     
     properties(SetAccess = protected)
-        parent;
-        
         panelHandle;
-    end
-    
-    events
-        WindowButtonMotion;
-        WindowButtonUp;
     end
     
     methods
@@ -20,38 +13,18 @@ classdef Panel < handle
             
             this.parent = parent;
             
-            addlistener(parent, 'WindowButtonMotion', @(src, evnt) this.windowButtonMotion());
-            addlistener(parent, 'WindowButtonUp', @(src, evnt) this.windowButtonUp());
+            addlistener(parent, 'ButtonMotion', @(src, evnt) this.buttonMotion());
+            addlistener(parent, 'ButtonUp', @(src, evnt) this.buttonUp());
             
             this.createPanel();
-        end
-        
-        function figure = getParentFigure(this)
-            if(isa(this.parent, 'Figure'))
-                figure = this.parent;
-            else
-                figure = this.parent.getParentFigure();
-            end
         end
     end
     
     methods(Access = protected)
         function createPanel(this)
-            if(isa(this.parent, 'Figure'))
-                parentHandle = this.parent.figureHandle;
-            else
-                parentHandle = this.parent.panelHandle;
-            end
+            this.panelHandle = uipanel(this.parent.handle);
             
-            this.panelHandle = uipanel(parentHandle);
-        end
-        
-        function windowButtonMotion(this)
-            notify(this, 'WindowButtonMotion');
-        end
-        
-        function windowButtonUp(this)
-            notify(this, 'WindowButtonUp');
+            set(this.panelHandle, 'ButtonDownFcn', @(src, evnt) this.buttonDown());
         end
     end
 end

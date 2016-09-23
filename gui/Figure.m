@@ -1,10 +1,5 @@
-classdef Figure < handle
+classdef Figure < Container
     % Figure Base class to handle common GUI properties and actions.
-    
-    properties (SetAccess = protected)
-        % MATLAB figure handle
-        figureHandle = [];
-    end
     
     events
         % Triggered when user attempts to close the figure
@@ -13,9 +8,6 @@ classdef Figure < handle
         FigureClosed;
         % Triggered when an information message is created
         InfoMessage;
-        
-        WindowButtonMotion;
-        WindowButtonUp;
     end
     
     methods
@@ -31,7 +23,7 @@ classdef Figure < handle
             %   setTitle(title)
             %       title - Title to assign.
             
-            set(this.figureHandle, 'Name', title);
+            set(this.handle, 'Name', title);
         end
         
         function delete(this)
@@ -44,11 +36,11 @@ classdef Figure < handle
             
             notify(this, 'FigureClosed');
             
-            if(this.figureHandle ~= 0)
-                delete(this.figureHandle);
+            if(this.handle ~= 0)
+                delete(this.handle);
             end
             
-            this.figureHandle = 0;
+            this.handle = 0;
         end
         
         function closeRequest(this)
@@ -73,33 +65,25 @@ classdef Figure < handle
             % createFigure Create figure.
             %
             %   createFigure()
-            if(isempty(this.figureHandle))
-                this.figureHandle = figure(...
+            if(isempty(this.handle))
+                this.handle = figure(...
                     'Name', 'Figure', 'NumberTitle','off',...
                     'Units','characters',...
                     'MenuBar','none',...
                     'Toolbar','none', ...
                     'CloseRequestFcn', @(src, evnt)this.closeRequest(), ...
-                    'WindowButtonMotionFcn', @(src, evnt)this.windowButtonMotion(), ...
-                    'WindowButtonUpFcn', @(src, evnt)this.windowButtonUp());
+                    'WindowButtonMotionFcn', @(src, evnt)this.buttonMotion(), ...
+                    'WindowButtonUpFcn', @(src, evnt)this.buttonUp());
                 
                 % Set the callback for when the window is resized
-                if(isprop(this.figureHandle, 'SizeChangedFcn'))
-                    set(this.figureHandle, 'SizeChangedFcn', @(src, evnt)this.sizeChanged());
+                if(isprop(this.handle, 'SizeChangedFcn'))
+                    set(this.handle, 'SizeChangedFcn', @(src, evnt)this.sizeChanged());
                 else
-                    set(this.figureHandle, 'ResizeFcn', @(src, evnt)this.sizeChanged());
+                    set(this.handle, 'ResizeFcn', @(src, evnt)this.sizeChanged());
                 end 
             end
             
             this.createMenu();
-        end
-        
-        function windowButtonMotion(this)
-            notify(this, 'WindowButtonMotion');
-        end
-        
-        function windowButtonUp(this)
-            notify(this, 'WindowButtonUp');
         end
         
         function createMenu(this)
@@ -115,35 +99,6 @@ classdef Figure < handle
         end
     end
     
-    methods (Static)
-        function position = getPositionInPixels(object) 
-            % getPositionInPixels  Get the position of the object within 
-            % the figure in pixels.
-            %
-            %    position = getPositionInPixels(object) 
-            
-            
-            oldUnits = get(object, 'Units');
-            set(object, 'Units', 'pixels');
-            
-            position = get(object, 'Position');
-            set(object, 'Units', oldUnits);
-        end
-        
-        function setObjectPositionInPixels(object, newPosition)
-            % setObjectPositionInPixels Set the position of object in 
-            % pixels.
-            %
-            %   setObjectPositionInPixels(object, newPosition) 
-            
-            % Ensure that we're setting the size to a valid one
-            if(newPosition(3) > 0 && newPosition(4) > 0)
-                oldUnits = get(object, 'Units');
-                set(object, 'Units', 'pixels');
-                set(object, 'Position', newPosition);
-                set(object, 'Units', oldUnits);
-            end
-        end
-    end
+    
     
 end
