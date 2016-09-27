@@ -1,6 +1,10 @@
 classdef Figure < Container
     % Figure Base class to handle common GUI properties and actions.
     
+    properties (SetAccess = protected)
+        toolbarHandle;
+    end
+    
     events
         % Triggered when user attempts to close the figure
         CloseRequested;
@@ -84,12 +88,19 @@ classdef Figure < Container
             end
             
             this.createMenu();
+            this.createToolbar();
         end
         
         function createMenu(this)
             % createMenu Create and add a menu to the figure.
             %
             %    createMenu()
+        end
+        
+        function createToolbar(this)
+            % createToolbar Create and add a toolbar to the figure.
+            %
+            %    createToolbar()
         end
         
         function sizeChanged(this)

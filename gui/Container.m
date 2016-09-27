@@ -21,6 +21,20 @@ classdef (Abstract) Container < handle
                 figure = this.parent.getParentFigure();
             end
         end
+        
+        function setWidth(this, width)
+            % setWidth Set the width of the container in pixels.
+            %
+            %   setWidth(width)
+            %       width - Width in pixels.
+            
+            units = get(this.handle, 'Units');
+            set(this.handle, 'Units', 'pixels');
+            currentPosition = get(this.handle, 'Position');
+            currentPosition(3) = width;
+            
+            set(this.handle, 'Position', currentPosition, 'Units', units);
+        end
     end
     
     methods (Access = protected)
