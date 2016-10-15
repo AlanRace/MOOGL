@@ -9,8 +9,8 @@ classdef MultiSpectrumDisplay < SpectrumDisplay
     end
     
     methods
-        function obj = MultiSpectrumDisplay(axis, spectrum)
-            obj = obj@SpectrumDisplay(axis, spectrum);
+        function obj = MultiSpectrumDisplay(parent, spectrum)
+            obj = obj@SpectrumDisplay(parent, spectrum);
             
             obj.spectrumList = SpectrumList();
             obj.spectrumList.add(spectrum);
@@ -56,11 +56,11 @@ classdef MultiSpectrumDisplay < SpectrumDisplay
                 set(obj.peakDetectionMenuItem(i), 'Checked', 'off');
             end
             
-            set(obj.peakDetectionMenuItem(index), 'Checked', 'on');
-            
-            obj.peakDetectionMethodIndex = index;
-            
             if(index > 1)
+                set(obj.peakDetectionMenuItem(index), 'Checked', 'on');
+            
+                obj.peakDetectionMethodIndex = index;
+                
                 spectrum = obj.spectrumList.get(obj.spectrumList.getSize());
                 
                 peakDetectionMethod = eval([obj.peakDetectionMethods{index} '()']);

@@ -13,7 +13,7 @@ classdef SpectralData < Data
     properties (SetObservable, SetAccess = private)
         % Is the spectrum continuous? i.e. should the spectrum be plotted with 
         % interpolation or as individual bars
-        isContinuous = 1;
+        isContinuous = true;
     end
     
     methods (Static)

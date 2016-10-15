@@ -28,12 +28,7 @@ classdef Display < handle
             end
             
             obj.parent = parent;
-            
-            if(isa(parent, 'Figure'))
-                parentHandle = parent.figureHandle;
-            else
-                parentHandle = parent.panelHandle;
-            end
+            parentHandle = parent.handle;
             
             obj.axisHandle = axes('Parent', parentHandle);
             

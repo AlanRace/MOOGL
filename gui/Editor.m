@@ -14,7 +14,7 @@ classdef Editor < Figure
            
 %             obj.addParameterControls();
             
-            obj.okButton = uicontrol(obj.figureHandle, 'String', 'OK', ...
+            obj.okButton = uicontrol(obj.handle, 'String', 'OK', ...
                     'Units', 'normalized', 'Position', [0.8 0.05 0.15 0.05], 'Callback', @(src, evnt)obj.okButtonCallback());
         end
         

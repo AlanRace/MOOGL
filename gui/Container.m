@@ -35,6 +35,36 @@ classdef (Abstract) Container < handle
             
             set(this.handle, 'Position', currentPosition, 'Units', units);
         end
+        
+        function setHeight(this, height)
+            % setHeight Set the height of the container in pixels.
+            %
+            %   setHeight(height)
+            %       height - Height in pixels.
+            
+            units = get(this.handle, 'Units');
+            set(this.handle, 'Units', 'pixels');
+            currentPosition = get(this.handle, 'Position');
+            currentPosition(4) = height;
+            
+            set(this.handle, 'Position', currentPosition, 'Units', units);
+        end
+        
+        function setSize(this, width, height)
+            % setSize Set the size of the container in pixels.
+            %
+            %   setSize(width, height)
+            %       width - Width in pixels.
+            %       height - Height in pixels.
+            
+            units = get(this.handle, 'Units');
+            set(this.handle, 'Units', 'pixels');
+            currentPosition = get(this.handle, 'Position');
+            currentPosition(3) = width;
+            currentPosition(4) = height;
+            
+            set(this.handle, 'Position', currentPosition, 'Units', units);
+        end
     end
     
     methods (Access = protected)

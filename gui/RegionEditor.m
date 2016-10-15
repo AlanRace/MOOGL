@@ -26,7 +26,7 @@ classdef RegionEditor < Editor
             
             this.createFigure();
             
-            set(this.figureHandle, 'Name', 'Region Editor');
+            set(this.handle, 'Name', 'Region Editor');
             this.setRegionOfInterest(region);
         end
        
@@ -49,19 +49,19 @@ classdef RegionEditor < Editor
         function createFigure(this)
             createFigure@Editor(this);
             
-            set(this.figureHandle, 'Units', 'pixels');
-            figureHandlePosition = get(this.figureHandle, 'Position');
+            set(this.handle, 'Units', 'pixels');
+            figureHandlePosition = get(this.handle, 'Position');
             figureHandlePosition(3) = 700;
             figureHandlePosition(4) = figureHandlePosition(4) + 30;
-            set(this.figureHandle, 'Position', figureHandlePosition);
-            set(this.figureHandle, 'Units', 'normalized');
+            set(this.handle, 'Position', figureHandlePosition);
+            set(this.handle, 'Units', 'normalized');
             
-            %             this.nameLabel = uicontrol('Parent', this.figureHandle, 'Style', 'text', 'String', 'Region Name', ...
+            %             this.nameLabel = uicontrol('Parent', this.handle, 'Style', 'text', 'String', 'Region Name', ...
             %                 'Units', 'normalized', 'Position', [0.05 0.9 0.4 0.05]);
-            this.nameEdit = uicontrol('Parent', this.figureHandle, 'Style', 'edit', ...
+            this.nameEdit = uicontrol('Parent', this.handle, 'Style', 'edit', ...
                 'Units', 'normalized', 'Position', [0.05 0.9 0.9 0.05]);
             
-            this.colourPanel = uipanel('Parent', this.figureHandle, ...
+            this.colourPanel = uipanel('Parent', this.handle, ...
                 'Units', 'normalized', 'Position', [0.05 0.125 0.9 0.75]);
             
             colourChooser = javax.swing.JColorChooser();
