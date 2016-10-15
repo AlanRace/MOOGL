@@ -13,10 +13,10 @@ classdef Display < handle
         exportMenu;
     end
     
-    events
-        % Event for when a button down occurs inside the axis 
-        MouseDownInsideAxis
-    end
+%     events
+%         % Event for when a button down occurs inside the axis 
+%         MouseDownInsideAxis
+%     end
     
     methods
         function obj = Display(parent, data)

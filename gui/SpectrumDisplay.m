@@ -31,8 +31,10 @@ classdef SpectrumDisplay < Display
     end
     
     events
-        MouseUpInsideAxis;
-        MouseClickInsideAxis;
+%         MouseUpInsideAxis;
+%         MouseClickInsideAxis;
+%         
+        PeakSelected;
     end
         
     methods
@@ -59,15 +61,28 @@ classdef SpectrumDisplay < Display
             
             uimenu(obj.exportMenu, 'Label', 'To CSV', 'Callback', @(src, evnt)obj.exportToCSV());
             
-            labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
+            % Checks if getSubclasses is on the path, if so likely to be
+            % SpectralAnalysis running, so add in the peak detection menu
+            % automatically
+            % TODO: Have a better way of automatically adding the peak
+            % picking menu, or move the menu elsewhere in the interface
+            if(exist('getSubclasses', 'file'))
+                [peakDetectionMethods, classNames] = getSubclasses('SpectralPeakDetection', 1);
+                
+                obj.addPeakDetectionMenu(peakDetectionMethods, classNames);
+            end
+       end
+        
+        function addPeakDetectionMenu(obj, peakDetectionMethods, classNames)
+           labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
+
+            obj.peakDetectionMethods = peakDetectionMethods;
             
-%            [obj.peakDetectionMethods classNames] = getSubclasses('SpectralPeakDetection', 1);
-%             
-%             for i = 1:length(classNames)
-%                 obj.peakDetectionMenuItem(i) = uimenu(labelPeaks, 'Label', classNames{i}, 'Callback', @(src, evnt)obj.labelPeaksWithMethod(i));
-%             end
-%             
-%             set(obj.peakDetectionMenuItem(1), 'Checked', 'on');
+            for i = 1:length(classNames)
+                obj.peakDetectionMenuItem(i) = uimenu(labelPeaks, 'Label', classNames{i}, 'Callback', @(src, evnt)obj.labelPeaksWithMethod(i));
+            end
+            
+            set(obj.peakDetectionMenuItem(1), 'Checked', 'on');
         end
         
         function exportToCSV(obj)
@@ -163,6 +178,8 @@ classdef SpectrumDisplay < Display
                 
 %                 size(obj.peakList)
             else
+                obj.peakDetectionMethod = [];
+                
                 obj.peakList = [];
                 obj.peakHeight = [];
                 obj.peakDetails = [];
@@ -320,7 +337,7 @@ classdef SpectrumDisplay < Display
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 obj.currentPoint = [currentPoint(1, 1) currentPoint(1, 2)];
 
-                if(obj.aboveAxis == 1)
+                if(obj.aboveAxis == 1 && obj.data.isContinuous)
                     obj.currentLine = line([obj.startPoint(1) obj.currentPoint(1)], [obj.startPoint(2) obj.startPoint(2)], 'Color', [0 1 0]);
                 elseif(obj.zoomingIn == 2)
                     if(~isempty(obj.xLimit))
@@ -347,11 +364,14 @@ classdef SpectrumDisplay < Display
                 if(~isNotSamePoint && obj.aboveAxis == 1)
                     obj.mouseClickInsideAxis();
                     
-                    mouseEvent = MouseEventData(MouseEventData.ButtonDown, obj.currentPoint(1), obj.currentPoint(2));
-                
-                    notify(obj, 'MouseClickInsideAxis', mouseEvent);
+                    peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, obj.startPoint(1));
+                    notify(obj, 'PeakSelected', peakSelectionEvent);
+                    
+%                     mouseEvent = MouseEventData(MouseEventData.ButtonDown, obj.currentPoint(1), obj.currentPoint(2));
+%                 
+%                     notify(obj, 'MouseClickInsideAxis', mouseEvent);
                 else
-                    if(obj.aboveAxis ~= 0 && isNotSamePoint)
+                    if(obj.aboveAxis ~= 0 && isNotSamePoint && obj.data.isContinuous)
                         obj.deleteLine();
 
                         currentPoint = get(obj.axisHandle, 'CurrentPoint');
@@ -361,8 +381,11 @@ classdef SpectrumDisplay < Display
 
                         obj.aboveAxis = 0;
 
-                        mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
-                        notify(obj, 'MouseUpInsideAxis', mouseEvent);
+                        peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Range, [obj.startPoint(1) xPoint]);
+                        notify(obj, 'PeakSelected', peakSelectionEvent);
+                        
+%                         mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
+%                         notify(obj, 'MouseUpInsideAxis', mouseEvent);
                     elseif(obj.zoomingIn ~= 0 && isNotSamePoint)
                         obj.deleteLine();
 
@@ -451,6 +474,7 @@ classdef SpectrumDisplay < Display
         
         function mouseClickInsideAxis(obj)
             %TODO: Fit to peak
+
         end
         
         function buttonDownCallback(obj)

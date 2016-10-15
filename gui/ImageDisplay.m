@@ -13,6 +13,10 @@ classdef ImageDisplay < Display
         lastSavedPath = '';
     end
     
+    events
+        PixelSelected
+    end
+    
     methods
         function obj = ImageDisplay(axisHandle, image)
             obj = obj@Display(axisHandle, image);
