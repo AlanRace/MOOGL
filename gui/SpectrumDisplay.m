@@ -380,8 +380,11 @@ classdef SpectrumDisplay < Display
                         yPoint = currentPoint(1, 2);
 
                         obj.aboveAxis = 0;
+                        
+                        peakRange = [obj.startPoint(1) xPoint];
+                        peakRange = sort(peakRange, 'ascend');
 
-                        peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Range, [obj.startPoint(1) xPoint]);
+                        peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Range, peakRange);
                         notify(obj, 'PeakSelected', peakSelectionEvent);
                         
 %                         mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
@@ -503,9 +506,9 @@ classdef SpectrumDisplay < Display
                     obj.aboveAxis = 1;
                 end
                 
-                mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
-                
-                notify(obj, 'MouseDownInsideAxis', mouseEvent);
+%                 mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
+%                 
+%                 notify(obj, 'MouseDownInsideAxis', mouseEvent);
             else
                 if(currentPoint(1, 1) < obj.xLimit(1))
                     obj.zoomingIn = 2;

@@ -90,26 +90,26 @@ classdef Display < handle
         exportToLaTeX(obj);
     end
     
-    methods (Access = protected)
-        function buttonDownCallback(obj)
-            currentPoint = get(obj.axisHandle, 'CurrentPoint');
-            
-            xLimit = get(obj.axisHandle, 'xLim');
-            yLimit = get(obj.axisHandle, 'yLim');
-            
-            xPoint = currentPoint(1, 1);
-            yPoint = currentPoint(1, 2);
-            
-            mouseClick = get(get(obj.axisHandle, 'Parent'), 'SelectionType');
-            
-            mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
-            if(strcmp(mouseClick, 'normal'))
-                mouseEvent.setButton(MouseEventData.LeftButton);
-            elseif(strcmp(mouseClick, 'alt'))
-                mouseEvent.setButton(MouseEventData.RightButton);
-            end
-            
-            notify(obj, 'MouseDownInsideAxis', mouseEvent);
-        end
-    end
+%     methods (Access = protected)
+%         function buttonDownCallback(obj)
+%             currentPoint = get(obj.axisHandle, 'CurrentPoint');
+%             
+%             xLimit = get(obj.axisHandle, 'xLim');
+%             yLimit = get(obj.axisHandle, 'yLim');
+%             
+%             xPoint = currentPoint(1, 1);
+%             yPoint = currentPoint(1, 2);
+%             
+%             mouseClick = get(get(obj.axisHandle, 'Parent'), 'SelectionType');
+%             
+%             mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
+%             if(strcmp(mouseClick, 'normal'))
+%                 mouseEvent.setButton(MouseEventData.LeftButton);
+%             elseif(strcmp(mouseClick, 'alt'))
+%                 mouseEvent.setButton(MouseEventData.RightButton);
+%             end
+%             
+%             notify(obj, 'MouseDownInsideAxis', mouseEvent);
+%         end
+%     end
 end

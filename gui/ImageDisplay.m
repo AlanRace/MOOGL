@@ -215,5 +215,16 @@ classdef ImageDisplay < Display
             
             obj.updateDisplay();
         end
+        
+        function buttonDownCallback(obj)
+            currentPoint = get(obj.axisHandle, 'CurrentPoint');
+            
+            xPoint = currentPoint(1, 1);
+            yPoint = currentPoint(1, 2);
+            
+            pse = PixelSelectionEvent(xPoint, yPoint);
+            
+            notify(obj, 'PixelSelected', pse);
+        end
     end
 end
