@@ -361,10 +361,12 @@ classdef SpectrumDisplay < Display
             if(~isempty(obj.startPoint))
                 isNotSamePoint = ~(isequal(obj.startPoint(1), obj.currentPoint(1)) && isequal(obj.startPoint(2), obj.currentPoint(2)));
 
-                if(~isNotSamePoint && obj.aboveAxis == 1)
+                currentPoint = get(obj.axisHandle, 'CurrentPoint');
+                
+                if((~isNotSamePoint && obj.aboveAxis == 1) || (~obj.data.isContinuous && obj.aboveAxis == 1))
                     obj.mouseClickInsideAxis();
                     
-                    peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, obj.startPoint(1));
+                    peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, currentPoint(1));
                     notify(obj, 'PeakSelected', peakSelectionEvent);
                     
 %                     mouseEvent = MouseEventData(MouseEventData.ButtonDown, obj.currentPoint(1), obj.currentPoint(2));
@@ -373,8 +375,6 @@ classdef SpectrumDisplay < Display
                 else
                     if(obj.aboveAxis ~= 0 && isNotSamePoint && obj.data.isContinuous)
                         obj.deleteLine();
-
-                        currentPoint = get(obj.axisHandle, 'CurrentPoint');
 
                         xPoint = currentPoint(1, 1);
                         yPoint = currentPoint(1, 2);

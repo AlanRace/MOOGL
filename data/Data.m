@@ -1,9 +1,12 @@
 classdef Data < handle
     % Data Abstract base class for data.
     
-    properties (SetAccess = private)
+    properties (SetAccess = protected)
         % Description of the data stored within class.
         description = 'Data';
+        
+        % Preprocessing workflow applied to generate the data
+        preprocessingWorkflow;
     end
     
     events
@@ -27,6 +30,14 @@ classdef Data < handle
             %       description - Description of the data
             
             description = this.description;
+        end
+        
+        function setPreprocessingWorkflow(this, preprocessingWorkflow)
+            % setPreprocessingWorkflow Set the preprocessing workflow used to generate the datas.
+            %
+            %   setPreprocessingWorkflow(preprocessingWorkflow)
+            %       preprocessingWorkflow - Preprocessing workflow
+            this.preprocessingWorkflow = preprocessingWorkflow;
         end
         
         function exportToWorkspace(this)
