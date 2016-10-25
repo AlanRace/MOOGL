@@ -1,14 +1,14 @@
-classdef SpectrumPanel < Panel
+classdef MultiSpectrumPanel < Panel
     
     properties (SetAccess = protected)        
         spectrumDisplay;
     end
     
     methods
-        function this = SpectrumPanel(parent, spectrum)
+        function this = MultiSpectrumPanel(parent, spectrum)
             this = this@Panel(parent);
             
-            this.spectrumDisplay = SpectrumDisplay(this, spectrum);
+            this.spectrumDisplay = MultiSpectrumDisplay(this, spectrum);
             addlistener(this.spectrumDisplay, 'DisplayChanged', @(src, evnt) this.sizeChanged());
         end
     end
