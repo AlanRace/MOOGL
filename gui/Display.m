@@ -17,6 +17,10 @@ classdef Display < handle
 %         % Event for when a button down occurs inside the axis 
 %         MouseDownInsideAxis
 %     end
+
+    events
+        DisplayChanged;
+    end
     
     methods
         function obj = Display(parent, data)
@@ -31,6 +35,7 @@ classdef Display < handle
             parentHandle = parent.handle;
             
             obj.axisHandle = axes('Parent', parentHandle);
+%             set(obj.axisHandle, 'ActivePositionProperty', 'OuterPosition');
             
             obj.setData(data);
             
@@ -62,7 +67,7 @@ classdef Display < handle
         end
         
         function createContextMenu(obj)
-            parentHandle = obj.parent.getParentFigure().handle;
+            parentHandle = obj.parent.getParentFigure().handle; %parent.handle;%
             
             % Set up the context menu
             obj.contextMenu = uicontextmenu('Parent', parentHandle);
@@ -79,12 +84,16 @@ classdef Display < handle
             
             obj.contextMenu = [];
         end
+        
+        
+        function updateDisplay(this)
+            notify(this, 'DisplayChanged');
+        end
     end
     
     methods (Abstract)
         openInNewWindow(obj);
         openCopyInNewWindow(obj);
-        updateDisplay(obj);
         
         exportToImage(obj);
         exportToLaTeX(obj);

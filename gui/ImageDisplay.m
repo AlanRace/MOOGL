@@ -154,7 +154,7 @@ classdef ImageDisplay < Display
         end
             
         
-        function updateDisplay(obj)
+        function updateDisplay(obj)            
             axes(obj.axisHandle);
             obj.imageHandle = imagesc(obj.data.imageData);
             axis image;
@@ -204,6 +204,10 @@ classdef ImageDisplay < Display
             % Reset necessary callbacks
             set(obj.axisHandle, 'UIContextMenu', obj.contextMenu);
             set(obj.imageHandle, 'UIContextMenu', obj.contextMenu);
+            
+            % Ensure that notifications are made that the display has
+            % changed
+            updateDisplay@Display(obj);
         end
     end
     

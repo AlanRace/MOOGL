@@ -11,6 +11,8 @@ classdef (Abstract) Container < handle
         ButtonDown;
         ButtonUp;
         ButtonMotion;
+        
+        SizeChanged;
     end
     
     methods
@@ -78,6 +80,14 @@ classdef (Abstract) Container < handle
         
         function buttonUp(this)
             notify(this, 'ButtonUp');
+        end
+        
+        function sizeChanged(this)
+            % sizeChanged Callback function for when figure size is changed.
+            %
+            %   sizeChanged()
+            
+            notify(this, 'SizeChanged');
         end
     end
     

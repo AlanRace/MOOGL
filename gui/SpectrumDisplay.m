@@ -325,6 +325,10 @@ classdef SpectrumDisplay < Display
             if(~isempty(obj.contextMenu))
                 set(obj.axisHandle, 'UIContextMenu', obj.contextMenu);
             end
+            
+            % Ensure that notifications are made that the display has
+            % changed
+            updateDisplay@Display(obj);
         end
         
         function mouseMovedCallback(obj)
@@ -334,6 +338,8 @@ classdef SpectrumDisplay < Display
 %             yLimit = get(obj.axisHandle, 'YLim');
 
             if(obj.leftMouseDown)
+                axes(obj.axisHandle);
+                
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 obj.currentPoint = [currentPoint(1, 1) currentPoint(1, 2)];
 
@@ -424,6 +430,8 @@ classdef SpectrumDisplay < Display
             else
                 this.plotHandle = plot(this.axisHandle, this.data.spectralChannels, this.data.intensities);
             end
+%             get(this.axisHandle)
+%             title(this.data.description);
         end
         
         function fixLimits(this)

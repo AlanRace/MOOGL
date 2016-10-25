@@ -103,11 +103,7 @@ classdef Figure < Container
             %    createToolbar()
         end
         
-        function sizeChanged(this)
-            % sizeChanged Callback function for when figure size is changed.
-            %
-            %   sizeChanged()
-        end
+        
     end
     
     

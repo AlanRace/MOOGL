@@ -1,9 +1,5 @@
 classdef Panel < Container
-    
-    properties(SetAccess = protected)
-        panelHandle;
-    end
-    
+        
     methods
         function this = Panel(parent)
             if(~isa(parent, 'Figure') && ~isa(parent, 'Panel'))
@@ -15,6 +11,7 @@ classdef Panel < Container
             
             addlistener(parent, 'ButtonMotion', @(src, evnt) this.buttonMotion());
             addlistener(parent, 'ButtonUp', @(src, evnt) this.buttonUp());
+            addlistener(parent, 'SizeChanged', @(src, evnt) this.sizeChanged());
             
             this.createPanel();
         end
@@ -22,9 +19,9 @@ classdef Panel < Container
     
     methods(Access = protected)
         function createPanel(this)
-            this.panelHandle = uipanel(this.parent.handle);
+            this.handle = uipanel(this.parent.handle, 'BorderWidth', 0);
             
-            set(this.panelHandle, 'ButtonDownFcn', @(src, evnt) this.buttonDown());
+            set(this.handle, 'ButtonDownFcn', @(src, evnt) this.buttonDown());
         end
     end
 end
