@@ -36,9 +36,10 @@ classdef ImageDisplay < Display
         % Open the data in a new window. Any changes made the the
         % underlying image will be updated in the new display too
         function display = openInNewWindow(obj)
-            figure;
-            axisHandle = axes;
-            display = ImageDisplay(axisHandle, obj.data);
+            figure = Figure;
+            figure.showStandardFigure();
+%             axisHandle = axes;
+            display = ImageDisplay(figure, obj.data);
             
             display.copy(obj);
         end
@@ -47,9 +48,10 @@ classdef ImageDisplay < Display
         % are made to the image in this display they aren't updated in
         % the new display
         function display = openCopyInNewWindow(obj)
-            figure;
-            axisHandle = axes;
-            display = ImageDisplay(axisHandle, Image(obj.data.imageData));
+            figure = Figure;
+            figure.showStandardFigure();
+%             axisHandle = axes;
+            display = ImageDisplay(figure, Image(obj.data.imageData));
             
             display.copy(obj);
         end
@@ -223,12 +225,16 @@ classdef ImageDisplay < Display
         function buttonDownCallback(obj)
             currentPoint = get(obj.axisHandle, 'CurrentPoint');
             
-            xPoint = currentPoint(1, 1);
-            yPoint = currentPoint(1, 2);
+            fig = gcbf;
             
-            pse = PixelSelectionEvent(xPoint, yPoint);
-            
-            notify(obj, 'PixelSelected', pse);
+            if(strcmp(get(fig, 'SelectionType'), 'normal'))
+                xPoint = currentPoint(1, 1);
+                yPoint = currentPoint(1, 2);
+
+                pse = PixelSelectionEvent(xPoint, yPoint);
+
+                notify(obj, 'PixelSelected', pse);
+            end
         end
     end
 end

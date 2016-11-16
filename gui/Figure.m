@@ -61,6 +61,20 @@ classdef Figure < Container
         function figure = getParentFigure(this)
             figure = this;
         end
+        
+        
+        function showStandardMenu(this)
+            set(this.handle, 'MenuBar', 'figure');
+        end
+        
+        function showStandardToolbar(this)
+            set(this.handle, 'Toolbar', 'figure');
+        end
+        
+        function showStandardFigure(this)
+            this.showStandardMenu();
+            this.showStandardToolbar();
+        end
     end
     
     methods (Access = protected)
@@ -102,7 +116,6 @@ classdef Figure < Container
             %
             %    createToolbar()
         end
-        
         
     end
     

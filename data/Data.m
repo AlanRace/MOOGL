@@ -48,18 +48,29 @@ classdef Data < handle
             % Default variable name
             variableName = {'data'};
             
+            errorMessage = '';
+            
             % Check that the variable name is a valid one, otherwise
             % request again
             while(~isempty(variableName))
                 % Request a variable name to export to
-                variableName = inputdlg('Invalid variable name. Please specifiy a variable name:', 'Variable name', 1, variableName);
+                variableName = inputdlg([errorMessage 'Please specifiy a variable name:'], 'Variable name', 1, variableName);
                 
+                % Check if the user selected cancel
+                if(isempty(variableName))
+                    break;
+                end
+                
+                % Ensure that the user selected a valid variable name
                 if(isvarname(variableName{1}))
                     % Export variable to workspace
                     assignin('base', variableName{1}, this);
                     
                     break;
                 end
+                
+                % Add in an error message to the variable name request
+                errorMessage = 'Invalid variable name. ';
             end
         end
         

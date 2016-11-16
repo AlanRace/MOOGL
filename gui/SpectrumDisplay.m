@@ -219,18 +219,20 @@ classdef SpectrumDisplay < Display
         % Open the data in a new window. Any changes made the the
         % underlying spectrum will be updated in the new display too
         function display = openInNewWindow(obj)
-            figure;
-            axisHandle = axes;
-            display = SpectrumDisplay(axisHandle, obj.data);
+            figure = Figure;
+            figure.showStandardFigure();
+%             axisHandle = axes;
+            display = SpectrumDisplay(figure, obj.data);
         end
         
         % Open a copy of the data in a new window so that if any changes
         % are made to the spectrum in this display they aren't updated in
         % the new display
         function display = openCopyInNewWindow(obj)
-            figure;
-            axisHandle = axes;
-            display = SpectrumDisplay(axisHandle, SpectralData(obj.data.spectralChannels, obj.data.intensities));
+            figure = Figure;
+            figure.showStandardFigure();
+%             axisHandle = axes;
+            display = SpectrumDisplay(figure, SpectralData(obj.data.spectralChannels, obj.data.intensities));
         end
         
         
@@ -426,7 +428,15 @@ classdef SpectrumDisplay < Display
         
         function plotSpectrum(this)
             if(~this.data.isContinuous)
-                this.plotHandle = bar(this.axisHandle, this.data.spectralChannels, this.data.intensities, 'k');
+                % Modify the bar width based on the zoom so that it
+                % displays correctly on MATLAB R2016 +
+%                 viewPercentage = (this.xLimit(2) - this.xLimit(1)) / (max(this.data.spectralChannels) - min(this.data.spectralChannels));
+                
+%                 barWidth = 1 / min(this.data.spectralChannels(2:end) - this.data.spectralChannels(1:end-1)) * viewPercentage %* 250
+                
+                this.plotHandle = bar(this.axisHandle, this.data.spectralChannels, this.data.intensities, 'k', 'EdgeColor', [0 0 0]);
+%                 get(this.plotHandle)
+%                 this.plotHandle = stem(this.axisHandle, this.data.spectralChannels, this.data.intensities);
             else
                 this.plotHandle = plot(this.axisHandle, this.data.spectralChannels, this.data.intensities);
             end

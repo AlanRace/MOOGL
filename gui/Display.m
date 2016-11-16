@@ -75,8 +75,8 @@ classdef Display < handle
             openCopyInNewWindow = uimenu(obj.contextMenu, 'Label', 'Open copy in new window', 'Callback', @(src,evnt)obj.openCopyInNewWindow());
             obj.exportMenu = uimenu(obj.contextMenu, 'Label', 'Export Data', 'Callback', []);
             uimenu(obj.exportMenu, 'Label', 'To workspace', 'Callback', @(src,evnt)obj.data.exportToWorkspace());
-            uimenu(obj.exportMenu, 'Label', 'To image', 'Callback', @(src, evnt)obj.exportToImage());
-            uimenu(obj.exportMenu, 'Label', 'To LaTeX', 'Callback', @(src, evnt)obj.exportToLaTeX());
+            uimenu(obj.exportMenu, 'Label', 'To PDF', 'Callback', @(src, evnt)obj.exportToImage());
+%             uimenu(obj.exportMenu, 'Label', 'To LaTeX', 'Callback', @(src, evnt)obj.exportToLaTeX());
         end
         
         function disableContextMenu(obj)
