@@ -26,8 +26,6 @@ classdef SpectrumDisplay < Display
         peakDetectionMenuItem;
         
         peakFilterListEditor;
-        
-        lastSavedPath = '';
     end
     
     events

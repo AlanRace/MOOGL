@@ -11,14 +11,12 @@ classdef Display < handle
         
         contextMenu;
         exportMenu;
+        
+        lastSavedPath = '';
     end
-    
-%     events
-%         % Event for when a button down occurs inside the axis 
-%         MouseDownInsideAxis
-%     end
 
     events
+        % 
         DisplayChanged;
     end
     
@@ -74,15 +72,32 @@ classdef Display < handle
             openInNewWindow = uimenu(obj.contextMenu, 'Label', 'Open in new window', 'Callback', @(src,evnt)obj.openInNewWindow());
             openCopyInNewWindow = uimenu(obj.contextMenu, 'Label', 'Open copy in new window', 'Callback', @(src,evnt)obj.openCopyInNewWindow());
             obj.exportMenu = uimenu(obj.contextMenu, 'Label', 'Export Data', 'Callback', []);
-            uimenu(obj.exportMenu, 'Label', 'To workspace', 'Callback', @(src,evnt)obj.data.exportToWorkspace());
+            
+            if(~isdeployed())
+                uimenu(obj.exportMenu, 'Label', 'To workspace', 'Callback', @(src,evnt)obj.data.exportToWorkspace());
+            end
+            
+            uimenu(obj.exportMenu, 'Label', 'To MATLAB .mat file', 'Callback', @(src, evnt)obj.exportToMAT()); 
             uimenu(obj.exportMenu, 'Label', 'To PDF', 'Callback', @(src, evnt)obj.exportToImage());
 %             uimenu(obj.exportMenu, 'Label', 'To LaTeX', 'Callback', @(src, evnt)obj.exportToLaTeX());
         end
         
-        function disableContextMenu(obj)
-            delete(obj.contextMenu);
+        function exportToMAT(this)
+            [fileName, pathName, filterIndex] = uiputfile([this.lastSavedPath 'data.mat'], 'Export data');
             
-            obj.contextMenu = [];
+            if(filterIndex > 0)
+                this.lastSavedPath = [pathName filesep];
+                
+                dataToExport = this.data;
+                
+                save([pathName filesep fileName], 'dataToExport');
+            end
+        end
+        
+        function disableContextMenu(this)
+            delete(this.contextMenu);
+            
+            this.contextMenu = [];
         end
         
         

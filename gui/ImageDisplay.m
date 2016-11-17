@@ -9,8 +9,6 @@ classdef ImageDisplay < Display
         colourMap = 'pink';
         axisVisibility = 'off';
         colourBarOn = 1;
-        
-        lastSavedPath = '';
     end
     
     events
@@ -142,6 +140,12 @@ classdef ImageDisplay < Display
         function setColourBarOn(obj, colourBarOn)
             obj.colourBarOn = colourBarOn;
             
+            if(obj.colourBarOn)
+                colorbar;
+            else
+                colorbar('off');
+            end
+            
             obj.updateDisplay();
         end
                 
@@ -158,15 +162,16 @@ classdef ImageDisplay < Display
         
         function updateDisplay(obj)            
             axes(obj.axisHandle);
-            obj.imageHandle = imagesc(obj.data.imageData);
-            axis image;
+            
+            if(isempty(obj.imageHandle))
+                obj.imageHandle = imagesc(obj.data.imageData);
+                axis image;
+            else
+                set(obj.imageHandle, 'CData', obj.data.imageData);
+            end
             
             colormap(obj.axisHandle, obj.colourMap);
             set(obj.axisHandle, 'Visible', obj.axisVisibility);
-            
-            if(obj.colourBarOn)
-                colorbar;
-            end
             
             if(isa(obj.regionOfInterestList, 'RegionOfInterestList'))
                 roisToDisplay = obj.regionOfInterestList.getObjects();
