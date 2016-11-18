@@ -165,10 +165,11 @@ classdef ImageDisplay < Display
             
             if(isempty(obj.imageHandle))
                 obj.imageHandle = imagesc(obj.data.imageData);
-                axis image;
             else
                 set(obj.imageHandle, 'CData', obj.data.imageData);
             end
+            
+            axis image;
             
             colormap(obj.axisHandle, obj.colourMap);
             set(obj.axisHandle, 'Visible', obj.axisVisibility);

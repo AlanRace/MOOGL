@@ -1,4 +1,4 @@
-classdef (Abstract) Container < handle
+classdef Container < handle
     
     properties (SetAccess = protected)
         % MATLAB figure handle
