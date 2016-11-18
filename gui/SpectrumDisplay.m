@@ -219,8 +219,11 @@ classdef SpectrumDisplay < Display
         function display = openInNewWindow(obj)
             figure = Figure;
             figure.showStandardFigure();
-%             axisHandle = axes;
-            display = SpectrumDisplay(figure, obj.data);
+            
+            spectrumPanel = SpectrumPanel(figure, obj.data);
+                
+            display = spectrumPanel.spectrumDisplay;
+            display.updateDisplay();
         end
         
         % Open a copy of the data in a new window so that if any changes
@@ -230,7 +233,11 @@ classdef SpectrumDisplay < Display
             figure = Figure;
             figure.showStandardFigure();
 %             axisHandle = axes;
-            display = SpectrumDisplay(figure, SpectralData(obj.data.spectralChannels, obj.data.intensities));
+            
+            spectrumPanel = SpectrumPanel(figure, SpectralData(obj.data.spectralChannels, obj.data.intensities));
+                
+            display = spectrumPanel.spectrumDisplay;
+            display.updateDisplay();
         end
         
         
