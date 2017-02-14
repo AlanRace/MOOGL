@@ -522,7 +522,7 @@ classdef PixelSelectionPanel < handle
                     threshold = this.backgroundImageData > minVal & this.backgroundImageData < maxVal;
                 end
                 
-                this.regionOfInterest.removePixels(ones(size(this.backgroundImage)));
+                this.regionOfInterest.removePixels(ones(size(this.backgroundImageData)));
                 this.regionOfInterest.addPixels(threshold);
                 
                 this.displaySelectionData();
