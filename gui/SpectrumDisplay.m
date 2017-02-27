@@ -26,6 +26,8 @@ classdef SpectrumDisplay < Display
         peakDetectionMenuItem;
         
         peakFilterListEditor;
+        
+        continuousDisplay;
     end
     
     events
@@ -69,7 +71,21 @@ classdef SpectrumDisplay < Display
                 
                 obj.addPeakDetectionMenu(peakDetectionMethods, classNames);
             end
-       end
+            
+            obj.continuousDisplay = uimenu(obj.contextMenu, 'Label', 'Continuous Display', 'Checked', 'on', 'Callback', @(src, evnt)obj.switchContinuousDisplay());
+        end
+        
+        function switchContinuousDisplay(this)
+            isContinuous = get(this.continuousDisplay, 'Checked');
+            
+            if(strcmp(isContinuous, 'on'))
+                set(this.continuousDisplay, 'Checked', 'off');
+            else
+                set(this.continuousDisplay, 'Checked', 'on');
+            end
+            
+            this.updateDisplay();
+        end
         
         function addPeakDetectionMenu(obj, peakDetectionMethods, classNames)
            labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
@@ -376,17 +392,22 @@ classdef SpectrumDisplay < Display
 
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 
-                if((~isNotSamePoint && obj.aboveAxis == 1) || (~obj.data.isContinuous && obj.aboveAxis == 1))
+                isContinuous = strcmp(get(obj.continuousDisplay, 'Checked'), 'on');
+                
+                if((~isNotSamePoint && obj.aboveAxis == 1 && ~isContinuous)) % || (~obj.data.isContinuous && obj.aboveAxis == 1))
                     obj.mouseClickInsideAxis();
                     
-                    peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, currentPoint(1));
+                    [minVal, minLoc] = min(abs(obj.data.spectralChannels - currentPoint(1)));
+                    minVal = obj.data.spectralChannels(minLoc);
+                    
+                    peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, minVal); % currentPoint(1));
                     notify(obj, 'PeakSelected', peakSelectionEvent);
                     
 %                     mouseEvent = MouseEventData(MouseEventData.ButtonDown, obj.currentPoint(1), obj.currentPoint(2));
 %                 
 %                     notify(obj, 'MouseClickInsideAxis', mouseEvent);
                 else
-                    if(obj.aboveAxis ~= 0 && isNotSamePoint && obj.data.isContinuous)
+                    if(obj.aboveAxis ~= 0 && isNotSamePoint) % && obj.data.isContinuous)
                         obj.deleteLine();
 
                         xPoint = currentPoint(1, 1);
@@ -432,7 +453,9 @@ classdef SpectrumDisplay < Display
     methods (Access = protected)
         
         function plotSpectrum(this)
-            if(~this.data.isContinuous)
+            isContinuous = strcmp(get(this.continuousDisplay, 'Checked'), 'on');
+            
+            if(~isContinuous)
                 % Modify the bar width based on the zoom so that it
                 % displays correctly on MATLAB R2016 +
 %                 viewPercentage = (this.xLimit(2) - this.xLimit(1)) / (max(this.data.spectralChannels) - min(this.data.spectralChannels));
