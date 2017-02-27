@@ -392,7 +392,11 @@ classdef SpectrumDisplay < Display
 
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 
-                isContinuous = strcmp(get(obj.continuousDisplay, 'Checked'), 'on');
+                if(~isempty(obj.continuousDisplay) && isvalid(obj.continuousDisplay))
+                    isContinuous = strcmp(get(obj.continuousDisplay, 'Checked'), 'on');
+                else
+                    isContinuous = true;
+                end
                 
                 if((~isNotSamePoint && obj.aboveAxis == 1 && ~isContinuous)) % || (~obj.data.isContinuous && obj.aboveAxis == 1))
                     obj.mouseClickInsideAxis();
@@ -453,7 +457,12 @@ classdef SpectrumDisplay < Display
     methods (Access = protected)
         
         function plotSpectrum(this)
-            isContinuous = strcmp(get(this.continuousDisplay, 'Checked'), 'on');
+            
+            if(~isempty(this.continuousDisplay) && isvalid(this.continuousDisplay))
+                isContinuous = strcmp(get(this.continuousDisplay, 'Checked'), 'on');
+            else
+                isContinuous = true;
+            end
             
             if(~isContinuous)
                 % Modify the bar width based on the zoom so that it
