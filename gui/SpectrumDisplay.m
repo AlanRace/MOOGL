@@ -1,12 +1,13 @@
 classdef SpectrumDisplay < Display
     properties (SetAccess = protected)
+        % Handle for either the bar or line plot
         plotHandle;
         
         peakList;
         peakDetails;
         peakHeight;
     end
-      
+    
     properties (Access = protected)
         % Variable used to determine if we are in zoom mode
         zoomingIn = 0;
@@ -31,12 +32,9 @@ classdef SpectrumDisplay < Display
     end
     
     events
-%         MouseUpInsideAxis;
-%         MouseClickInsideAxis;
-%         
         PeakSelected;
     end
-        
+    
     methods
         function obj = SpectrumDisplay(parent, spectrum)
             obj = obj@Display(parent, spectrum);
@@ -50,10 +48,6 @@ classdef SpectrumDisplay < Display
             addlistener(parent, 'ButtonDown', @(src, evnt)obj.buttonDownCallback());
             addlistener(parent, 'ButtonMotion', @(src,evnt)obj.mouseMovedCallback());
             addlistener(parent, 'ButtonUp', @(src, evnt)obj.mouseButtonUpCallback());
-%             set(get(obj.axisHandle, 'Parent'), 'WindowButtonMotionFcn', @(src,evnt)obj.mouseMovedCallback());
-%             set(get(obj.axisHandle, 'Parent'), 'WindowButtonUpFcn', @(src, evnt)obj.mouseButtonUpCallback());
-            
-%             obj.updateDisplay();
         end
         
         function createContextMenu(obj)
@@ -76,6 +70,10 @@ classdef SpectrumDisplay < Display
         end
         
         function switchContinuousDisplay(this)
+            % switchContinuousDisplay Toggle the display between continuous and discrete.
+            %
+            %   switchContinuousDisplay()
+            
             isContinuous = get(this.continuousDisplay, 'Checked');
             
             if(strcmp(isContinuous, 'on'))
@@ -88,8 +86,12 @@ classdef SpectrumDisplay < Display
         end
         
         function addPeakDetectionMenu(obj, peakDetectionMethods, classNames)
-           labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
-
+            % switchContinuousDisplay Toggle the display between continuous and discrete.
+            %
+            %   switchContinuousDisplay()
+            
+            labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
+            
             obj.peakDetectionMethods = peakDetectionMethods;
             
             for i = 1:length(classNames)
@@ -111,7 +113,7 @@ classdef SpectrumDisplay < Display
                     peakList = obj.peakList;
                     peakHeight = obj.peakHeight;
                 end
-%                 size(peakList)
+                %                 size(peakList)
                 try
                     dlmwrite([PathName filesep FileName], [peakList' peakHeight'], 'precision', 16);
                 catch err
@@ -133,16 +135,16 @@ classdef SpectrumDisplay < Display
                 obj.updatePeakDetection();
             end
             
-%             if(~isempty(obj.peakDetectionMenuItem))
-%                 peakDetectionMethod = 1;
-%                 for i = 1:length(obj.peakDetectionMenuItem)
-%                     if(strcmp(get(obj.peakDetectionMenuItem(i), 'Checked'), 'on'))
-%                         peakDetectionMethod = i;
-%                     end
-%                 end
-%                 
-%                 obj.labelPeaksWithMethod(peakDetectionMethod);
-%             end
+            %             if(~isempty(obj.peakDetectionMenuItem))
+            %                 peakDetectionMethod = 1;
+            %                 for i = 1:length(obj.peakDetectionMenuItem)
+            %                     if(strcmp(get(obj.peakDetectionMenuItem(i), 'Checked'), 'on'))
+            %                         peakDetectionMethod = i;
+            %                     end
+            %                 end
+            %
+            %                 obj.labelPeaksWithMethod(peakDetectionMethod);
+            %             end
         end
         
         function xLimit = getXLimit(obj)
@@ -189,8 +191,6 @@ classdef SpectrumDisplay < Display
                     obj.peakFilterListEditor = PeakFilterListEditor(obj.data, obj.peakDetectionMethod);
                     addlistener(obj.peakFilterListEditor, 'FinishedEditing', @(src, evnt)obj.updatePeakDetection());
                 end
-                
-%                 size(obj.peakList)
             else
                 obj.peakDetectionMethod = [];
                 
@@ -208,50 +208,47 @@ classdef SpectrumDisplay < Display
             obj.updatePeakDetection();
         end
         
-        function updatePeakDetection(obj) 
+        function updatePeakDetection(obj)
             [obj.peakList, obj.peakHeight, obj.peakDetails] = obj.peakDetectionMethod.process(obj.data.spectralChannels, obj.data.intensities);
             
             assignin('base', 'peakDetails', obj.peakDetails);
             
             obj.updateDisplay();
         end
-        
-%         function setSpectrum(obj, spectrum)
-%             if(~isa(spectrum, 'SpectralData'))
-%                 exception = MException('SpectrumDisplay:invalidArgument', 'Must provide an instance of a class that extends SpectralData');
-%                 throw(exception);
-%             end
-%             
-%             obj.data = spectrum;
-%             
-%             obj.updateDisplay();
-%             
-%             delete(obj.spectrumListener);
-%             obj.spectrumListener = addlistener(spectrum, 'DataChanged', @(src, evnt)obj.updateDisplay());
-%         end
-        
-        % Open the data in a new window. Any changes made the the
-        % underlying spectrum will be updated in the new display too
+                
         function display = openInNewWindow(obj)
+            % openInNewWindow Opens the spectral data in a new window.
+            %
+            %   openInNewWindow()
+            %
+            %   Open the spectral data in a new window with same display 
+            %   options applied. Any changes made the the underlying 
+            %   spectrum will be updated in the new display too.
+            
             figure = Figure;
             figure.showStandardFigure();
             
             spectrumPanel = SpectrumPanel(figure, obj.data);
-                
+            
             display = spectrumPanel.spectrumDisplay;
             display.updateDisplay();
         end
         
-        % Open a copy of the data in a new window so that if any changes
-        % are made to the spectrum in this display they aren't updated in
-        % the new display
         function display = openCopyInNewWindow(obj)
+            % openCopyInNewWindow Opens a copy of the spectral data in a new window.
+            %
+            %   openCopyInNewWindow()
+            %
+            %   Open a copy of the spectral data in a new window so that if 
+            %   any changes are made to the spectrum in this display they 
+            %   aren't updated in the new display.
+        
+            
             figure = Figure;
             figure.showStandardFigure();
-%             axisHandle = axes;
             
             spectrumPanel = SpectrumPanel(figure, SpectralData(obj.data.spectralChannels, obj.data.intensities));
-                
+            
             display = spectrumPanel.spectrumDisplay;
             display.updateDisplay();
         end
@@ -267,16 +264,16 @@ classdef SpectrumDisplay < Display
                 axisHandle = axes;
                 normPos = get(axisHandle, 'Position');
                 delete(axisHandle);
-%                 display = SpectrumDisplay(axisHandle, obj.data);
-% 
-% %                 display.copy(obj);
-%                 
-%                 set(axisHandle, 'Color', 'none');
-%                 set(f, 'Color', 'none');
-%                 
-%                 set(axisHandle, 'XLim', obj.xLimit);
-%                 set(axisHandle, 'YLim', obj.yLimit);
-
+                %                 display = SpectrumDisplay(axisHandle, obj.data);
+                %
+                % %                 display.copy(obj);
+                %
+                %                 set(axisHandle, 'Color', 'none');
+                %                 set(f, 'Color', 'none');
+                %
+                %                 set(axisHandle, 'XLim', obj.xLimit);
+                %                 set(axisHandle, 'YLim', obj.yLimit);
+                
                 newAxis = copyobj(obj.axisHandle, f);
                 
                 % Fix aspect ratio
@@ -291,13 +288,13 @@ classdef SpectrumDisplay < Display
                 set(f, 'PaperSize', [posOfFigure(3) posOfFigure(4)]);
                 set(f, 'PaperPosition', posOfFigure);
                 set(f, 'PaperPositionMode', 'manual');
-%                 set(f, 'PaperOrientation', 'landscape');
+                %                 set(f, 'PaperOrientation', 'landscape');
                 
-%                 get(f)
+                %                 get(f)
                 
                 print(f, [pathName filesep fileName], '-dpdf', '-painters', '-r0');% test.pdf
                 
-%                 export_fig(f, [pathName filesep fileName], '-painters', '-transparent');
+                %                 export_fig(f, [pathName filesep fileName], '-painters', '-transparent');
                 delete(f);
             end
         end
@@ -306,8 +303,8 @@ classdef SpectrumDisplay < Display
         end
         
         function updateDisplay(obj)
-%             xLimit = get(obj.axisHandle, 'xLim');
-%             yLimit = get(obj.axisHandle, 'yLim');            
+            %             xLimit = get(obj.axisHandle, 'xLim');
+            %             yLimit = get(obj.axisHandle, 'yLim');
             
             obj.plotSpectrum();
             
@@ -315,23 +312,23 @@ classdef SpectrumDisplay < Display
             obj.updateLimits();
             
             if(~isempty(obj.peakList))
-%                 if(xLimit ~= [0 1])
-                    indicies = obj.peakList >= obj.xLimit(1) & obj.peakList <= obj.xLimit(2);
-                    
-                    peakList = obj.peakList(indicies);
-                    peakHeight = obj.peakHeight(indicies);
-                    
-                    yPos = ((obj.yLimit(2) - obj.yLimit(1)) * 0.95) + obj.yLimit(1);
-                    
-                    text(obj.xLimit(1), yPos, ['Detected peaks: ' num2str(length(obj.peakList))], 'Parent', obj.axisHandle);
-%                 else
-%                     peakList = obj.peakList;
-%                     peakHeight = obj.peakHeight;
-%                     
-%                     yPos = ((max(obj.data.intensities) - min(obj.data.intensities)) * 0.95) + min(obj.data.intensities);
-%                     
-%                     text(min(obj.data.spectralChannels), yPos, ['Detected peaks: ' num2str(length(obj.peakList))], 'Parent', obj.axisHandle);
-%                 end
+                %                 if(xLimit ~= [0 1])
+                indicies = obj.peakList >= obj.xLimit(1) & obj.peakList <= obj.xLimit(2);
+                
+                peakList = obj.peakList(indicies);
+                peakHeight = obj.peakHeight(indicies);
+                
+                yPos = ((obj.yLimit(2) - obj.yLimit(1)) * 0.95) + obj.yLimit(1);
+                
+                text(obj.xLimit(1), yPos, ['Detected peaks: ' num2str(length(obj.peakList))], 'Parent', obj.axisHandle);
+                %                 else
+                %                     peakList = obj.peakList;
+                %                     peakHeight = obj.peakHeight;
+                %
+                %                     yPos = ((max(obj.data.intensities) - min(obj.data.intensities)) * 0.95) + min(obj.data.intensities);
+                %
+                %                     text(min(obj.data.spectralChannels), yPos, ['Detected peaks: ' num2str(length(obj.peakList))], 'Parent', obj.axisHandle);
+                %                 end
                 
                 [m, indicies] = sort(peakHeight, 'descend');
                 
@@ -339,7 +336,7 @@ classdef SpectrumDisplay < Display
                     text(peakList(indicies(i)), peakHeight(indicies(i)), num2str(peakList(indicies(i))), 'Parent', obj.axisHandle);
                 end
             end
-%            warning('TODO: Display any detected peaks avoiding textual overlap');
+            %            warning('TODO: Display any detected peaks avoiding textual overlap');
             
             % Set up callback functions such as button down functions
             set(obj.plotHandle, 'ButtonDownFcn', @(src, evnt)obj.buttonDownCallback());
@@ -357,15 +354,15 @@ classdef SpectrumDisplay < Display
         function mouseMovedCallback(obj)
             obj.deleteLine();
             
-%             xLimit = get(obj.axisHandle, 'XLim');
-%             yLimit = get(obj.axisHandle, 'YLim');
-
+            %             xLimit = get(obj.axisHandle, 'XLim');
+            %             yLimit = get(obj.axisHandle, 'YLim');
+            
             if(obj.leftMouseDown)
                 axes(obj.axisHandle);
                 
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 obj.currentPoint = [currentPoint(1, 1) currentPoint(1, 2)];
-
+                
                 if(obj.aboveAxis == 1 && obj.data.isContinuous)
                     obj.currentLine = line([obj.startPoint(1) obj.currentPoint(1)], [obj.startPoint(2) obj.startPoint(2)], 'Color', [0 1 0]);
                 elseif(obj.zoomingIn == 2)
@@ -389,7 +386,7 @@ classdef SpectrumDisplay < Display
             
             if(~isempty(obj.startPoint))
                 isNotSamePoint = ~(isequal(obj.startPoint(1), obj.currentPoint(1)) && isequal(obj.startPoint(2), obj.currentPoint(2)));
-
+                
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 
                 if(~isempty(obj.continuousDisplay) && isvalid(obj.continuousDisplay))
@@ -407,43 +404,43 @@ classdef SpectrumDisplay < Display
                     peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, minVal); % currentPoint(1));
                     notify(obj, 'PeakSelected', peakSelectionEvent);
                     
-%                     mouseEvent = MouseEventData(MouseEventData.ButtonDown, obj.currentPoint(1), obj.currentPoint(2));
-%                 
-%                     notify(obj, 'MouseClickInsideAxis', mouseEvent);
+                    %                     mouseEvent = MouseEventData(MouseEventData.ButtonDown, obj.currentPoint(1), obj.currentPoint(2));
+                    %
+                    %                     notify(obj, 'MouseClickInsideAxis', mouseEvent);
                 else
                     if(obj.aboveAxis ~= 0 && isNotSamePoint) % && obj.data.isContinuous)
                         obj.deleteLine();
-
+                        
                         xPoint = currentPoint(1, 1);
                         yPoint = currentPoint(1, 2);
-
+                        
                         obj.aboveAxis = 0;
                         
                         peakRange = [obj.startPoint(1) xPoint];
                         peakRange = sort(peakRange, 'ascend');
-
+                        
                         peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Range, peakRange);
                         notify(obj, 'PeakSelected', peakSelectionEvent);
                         
-%                         mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
-%                         notify(obj, 'MouseUpInsideAxis', mouseEvent);
+                        %                         mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
+                        %                         notify(obj, 'MouseUpInsideAxis', mouseEvent);
                     elseif(obj.zoomingIn ~= 0 && isNotSamePoint)
                         obj.deleteLine();
-
-    %                     xLimit = get(obj.axisHandle, 'XLim');
-    %                     yLimit = get(obj.axisHandle, 'YLim');
-
+                        
+                        %                     xLimit = get(obj.axisHandle, 'XLim');
+                        %                     yLimit = get(obj.axisHandle, 'YLim');
+                        
                         if(obj.zoomingIn == 1)
-    %                         set(obj.axisHandle, 'XLim', sort([obj.startPoint(1) obj.currentPoint(1)], 'ascend'));
-    %                         set(obj.axisHandle, 'YLim', yLimit);
+                            %                         set(obj.axisHandle, 'XLim', sort([obj.startPoint(1) obj.currentPoint(1)], 'ascend'));
+                            %                         set(obj.axisHandle, 'YLim', yLimit);
                             obj.xLimit = sort([obj.startPoint(1) obj.currentPoint(1)], 'ascend');
                             obj.yLimit = [];
                         else
-    %                         set(obj.axisHandle, 'YLim', sort([obj.startPoint(2) obj.currentPoint(2)], 'ascend'));
-    %                         set(obj.axisHandle, 'XLim', xLimit);
+                            %                         set(obj.axisHandle, 'YLim', sort([obj.startPoint(2) obj.currentPoint(2)], 'ascend'));
+                            %                         set(obj.axisHandle, 'XLim', xLimit);
                             obj.yLimit = sort([obj.startPoint(2) obj.currentPoint(2)], 'ascend');
                         end
-
+                        
                         obj.updateDisplay();
                     end
                 end
@@ -453,32 +450,28 @@ classdef SpectrumDisplay < Display
             obj.zoomingIn = 0;
         end
     end
-       
+    
     methods (Access = protected)
         
         function plotSpectrum(this)
-            
+            % Check if the continuousDisplay (tick box in the context menu)
+            % has been assigned and is still valid, otherwise default to
+            % continuous data
             if(~isempty(this.continuousDisplay) && isvalid(this.continuousDisplay))
                 isContinuous = strcmp(get(this.continuousDisplay, 'Checked'), 'on');
             else
                 isContinuous = true;
             end
             
+            % If the display is set to continuous, then plot with 'plot'
+            % otherwise use 'bar'
             if(~isContinuous)
-                % Modify the bar width based on the zoom so that it
-                % displays correctly on MATLAB R2016 +
-%                 viewPercentage = (this.xLimit(2) - this.xLimit(1)) / (max(this.data.spectralChannels) - min(this.data.spectralChannels));
-                
-%                 barWidth = 1 / min(this.data.spectralChannels(2:end) - this.data.spectralChannels(1:end-1)) * viewPercentage %* 250
-                
+                % Ensure that an edge colour is applied to the bar so that
+                % it is visualised correctly in MATLAB R2016+
                 this.plotHandle = bar(this.axisHandle, this.data.spectralChannels, this.data.intensities, 'k', 'EdgeColor', [0 0 0]);
-%                 get(this.plotHandle)
-%                 this.plotHandle = stem(this.axisHandle, this.data.spectralChannels, this.data.intensities);
             else
                 this.plotHandle = plot(this.axisHandle, this.data.spectralChannels, this.data.intensities);
             end
-%             get(this.axisHandle)
-%             title(this.data.description);
         end
         
         function fixLimits(this)
@@ -525,21 +518,21 @@ classdef SpectrumDisplay < Display
                 catch err
                     warning('TODO: Handle error')
                 end
-                    
-                obj.currentLine = [];    
+                
+                obj.currentLine = [];
             end
         end
         
         function mouseClickInsideAxis(obj)
             %TODO: Fit to peak
-
+            
         end
         
         function buttonDownCallback(obj)
             currentPoint = get(obj.axisHandle, 'CurrentPoint');
             
-%             xLimit = get(obj.axisHandle, 'xLim');
-%             yLimit = get(obj.axisHandle, 'yLim');
+            %             xLimit = get(obj.axisHandle, 'xLim');
+            %             yLimit = get(obj.axisHandle, 'yLim');
             
             xPoint = currentPoint(1, 1);
             yPoint = currentPoint(1, 2);
@@ -561,9 +554,9 @@ classdef SpectrumDisplay < Display
                     obj.aboveAxis = 1;
                 end
                 
-%                 mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
-%                 
-%                 notify(obj, 'MouseDownInsideAxis', mouseEvent);
+                %                 mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
+                %
+                %                 notify(obj, 'MouseDownInsideAxis', mouseEvent);
             else
                 if(currentPoint(1, 1) < obj.xLimit(1))
                     obj.zoomingIn = 2;
@@ -575,19 +568,19 @@ classdef SpectrumDisplay < Display
                     obj.zoomingIn = 0;
                     
                     if(currentPoint(1, 1) < obj.xLimit(1))
-%                         ylim('auto');
+                        %                         ylim('auto');
                         currentIntensities = obj.data.intensities(obj.data.spectralChannels >= obj.xLimit(1) & obj.data.spectralChannels <= obj.xLimit(2));
                         obj.yLimit = [min(currentIntensities) max(currentIntensities)];
                     end
                     if(isempty(obj.yLimit) || currentPoint(2, 2) < obj.yLimit(1))
-%                         xlim('auto');
+                        %                         xlim('auto');
                         obj.xLimit = [min(obj.data.spectralChannels) max(obj.data.spectralChannels)];
                         obj.yLimit = [];
                     end
                     
                     obj.updateDisplay();
                 end
-            end          
+            end
         end
     end
 end
