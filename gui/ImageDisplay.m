@@ -166,8 +166,11 @@ classdef ImageDisplay < Display
             if(isempty(obj.imageHandle))
                 obj.imageHandle = imagesc(obj.data.imageData);
             else
-                set(obj.imageHandle, 'CData', obj.data.imageData);
+%                 set(obj.imageHandle, 'CData', obj.data.imageData);
+                obj.imageHandle = imagesc(obj.data.imageData);
             end
+            
+            set(obj.imageHandle, 'AlphaData', 1);
             
             axis image;
             
