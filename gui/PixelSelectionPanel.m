@@ -363,20 +363,23 @@ classdef PixelSelectionPanel < handle
                 
                 if(obj.toolActive == PixelSelectionPanel.PolyActive && ...
                     strcmp(get(obj.parent, 'SelectionType'), 'open'))
-                    lastPos = get(obj.shapeHandle(1), 'Position');
-                            
-                    line([startX lastPos(1)+5], [startY lastPos(2)+5]);
                 
-                    for i = 1:length(obj.shapeHandle)
-                        endIndex = i + 1;
-                        if(endIndex > length(obj.shapeHandle))
-                            endIndex = 1;
+                    if(~isempty(obj.shapeHandle))
+                        lastPos = get(obj.shapeHandle(1), 'Position');
+
+                        line([startX lastPos(1)+5], [startY lastPos(2)+5]);
+
+                        for i = 1:length(obj.shapeHandle)
+                            endIndex = i + 1;
+                            if(endIndex > length(obj.shapeHandle))
+                                endIndex = 1;
+                            end
+
+                            startPos = get(obj.shapeHandle(i), 'Position');
+                            endPos = get(obj.shapeHandle(endIndex), 'Position');
+
+                            shape = obj.addLineToShape(shape, startPos(1:2)+5, endPos(1:2)+5);
                         end
-                        
-                        startPos = get(obj.shapeHandle(i), 'Position');
-                        endPos = get(obj.shapeHandle(endIndex), 'Position');
-                        
-                        shape = obj.addLineToShape(shape, startPos(1:2)+5, endPos(1:2)+5);
                     end
                     
                     shape = imfill(shape, 'holes');
