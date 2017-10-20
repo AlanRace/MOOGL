@@ -179,13 +179,13 @@ classdef RegionOfInterest < Copyable
         end
     end
     
-    methods (Access = protected)
+    methods (Access = protected)        
         function cpObj = copyElement(this)
             % Make a shallow copy 
-            cpObj = copyElement@Copyable(this);
+            cpObj = copyElement@Copyable(this, this.width, this.height);
             
-            cpObj.width = this.width;
-            cpObj.height = this.height;
+%             cpObj.width = this.width;
+%             cpObj.height = this.height;
             cpObj.name = this.name;
             cpObj.colour = this.colour;
             cpObj.pixelSelection = this.pixelSelection;

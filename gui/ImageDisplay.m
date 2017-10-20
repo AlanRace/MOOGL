@@ -131,6 +131,37 @@ classdef ImageDisplay < Display
         function exportToLaTeX(obj)
         end
         
+        function setDivergingColourMap(this)
+            minVal = min(0, min(this.data.imageData(:)));
+            maxVal = max(0, max(this.data.imageData(:)));
+            
+            %             scale = (maxVal - minVal) / 64;
+            
+            scaleSize = 256;
+            zeroLoc = round((abs(minVal) / (maxVal - minVal)) * scaleSize);
+            
+            if(zeroLoc <= 0)
+                zeroLoc = 1;
+            elseif(zeroLoc >= scaleSize)
+                zeroLoc = scaleSize;
+            end
+            
+            colourMap = zeros(scaleSize, 3);
+            
+            for i = 1:zeroLoc
+                colourMap(i, 2) = ((zeroLoc - (i - 1)) / zeroLoc);
+            end
+            
+            for i = zeroLoc:scaleSize
+                colourMap(i, [1 3]) = (i - zeroLoc) / (scaleSize - zeroLoc);
+            end
+            
+            colourMap(zeroLoc, :) = [0 0 0];
+            
+            this.setColourMap(colourMap);
+            this.setColourBarOn(1);
+        end
+        
         function setColourMap(obj, colourMap)
             obj.colourMap = colourMap;
             
@@ -139,12 +170,6 @@ classdef ImageDisplay < Display
         
         function setColourBarOn(obj, colourBarOn)
             obj.colourBarOn = colourBarOn;
-            
-            if(obj.colourBarOn)
-                colorbar;
-            else
-                colorbar('off');
-            end
             
             obj.updateDisplay();
         end
@@ -176,6 +201,12 @@ classdef ImageDisplay < Display
             
             colormap(obj.axisHandle, obj.colourMap);
             set(obj.axisHandle, 'Visible', obj.axisVisibility);
+            
+            if(obj.colourBarOn)
+                colorbar;
+            else
+                colorbar('off');
+            end
             
             if(isa(obj.regionOfInterestList, 'RegionOfInterestList'))
                 roisToDisplay = obj.regionOfInterestList.getObjects();

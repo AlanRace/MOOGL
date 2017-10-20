@@ -11,8 +11,15 @@ classdef Copyable < hgsetget
     
     
     methods (Access = protected)    
-        function newObj = copyElement(obj)
-            newObj = eval(class(obj));
+        function newObj = copyElement(obj, varargin)
+            fh = str2func(class(obj));
+            
+            if(~isempty(varargin))
+                newObj = fh(varargin{:});
+            else
+                newObj = fh();
+            end
+%             newObj = eval(class(obj));
             
             props = properties(obj);
             
