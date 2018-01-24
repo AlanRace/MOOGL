@@ -115,7 +115,26 @@ classdef SpectrumDisplay < Display
                 end
                 %                 size(peakList)
                 try
-                    dlmwrite([PathName filesep FileName], [peakList' peakHeight'], 'precision', 16);
+                    decimalSeparator = java.text.DecimalFormat().getDecimalFormatSymbols().getDecimalSeparator();
+                    
+                    % Check to see if the computer is set to use German
+                    % deceimal separators
+                    if(strcmp(decimalSeparator, ','))
+                        decimalSeparator = ',';
+                        csvSeparator = ';';
+                    else
+                        decimalSeparator = '.';
+                        csvSeparator = ',';
+                    end
+                    
+                    fid = fopen([PathName filesep FileName], 'w');
+                    
+                    for i = 1:length(peakList)
+                        fprintf(fid, strrep(strrep(sprintf('%0.10f%s%0.10f\n', peakList(i), '#', peakHeight(i)), '.', decimalSeparator), '#', csvSeparator));
+                    end
+                    
+                    fclose(fid);
+%                     dlmwrite([PathName filesep FileName], [peakList' peakHeight'], 'precision', 16);
                 catch err
                     msgbox(err.message, err.identifier);
                     err
