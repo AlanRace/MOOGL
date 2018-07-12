@@ -9,6 +9,13 @@ classdef ImageDisplay < Display
         colourMap = 'pink';
         axisVisibility = 'off';
         colourBarOn = 1;
+        
+        minValueToDisplay = 0;
+        maxValueToDisplay = 1;
+        
+        equaliseHistogram = 0;
+        
+        dataToVisualise;
     end
     
     events
@@ -29,6 +36,17 @@ classdef ImageDisplay < Display
             obj.updateDisplay();
             
             addlistener(image, 'DataChanged', @(src, evnt)obj.updateDisplay());
+        end
+        
+        function setData(this, data)
+            this.minValueToDisplay = min(data.imageData(:));
+            this.maxValueToDisplay = max(data.imageData(:));
+            
+            if(this.minValueToDisplay == this.maxValueToDisplay)
+                this.minValueToDisplay = 0;
+            end
+            
+            setData@Display(this, data);
         end
         
         % Open the data in a new window. Any changes made the the
@@ -183,29 +201,64 @@ classdef ImageDisplay < Display
             
             this.updateDisplay();
         end
+        
+        function setEqualiseHistogram(this, equalise)
+            this.equaliseHistogram = equalise;
             
+            this.updateDisplay();
+        end
+        
+        function visualisedData = getVisualisedData(this) 
+            visualisedData = this.dataToVisualise;
+        end
+        
+        function setMinValueToDisplay(this, minValue)
+            this.minValueToDisplay = minValue;
+            
+            this.updateDisplay();
+        end
+        
+        function setMaxValueToDisplay(this, maxValue)
+            this.maxValueToDisplay = maxValue;
+            
+            this.updateDisplay();
+        end
         
         function updateDisplay(obj)            
-            axes(obj.axisHandle);
+%             axes(obj.axisHandle);
+
+            
+            obj.dataToVisualise = obj.data.imageData;
+            
+            if(obj.equaliseHistogram && ismatrix(obj.dataToVisualise))
+                maxValue = max(obj.dataToVisualise(:));
+                
+                obj.dataToVisualise = histeq(obj.dataToVisualise ./ maxValue) .* maxValue;
+            end
+            
+            obj.dataToVisualise(obj.dataToVisualise < obj.minValueToDisplay) = obj.minValueToDisplay;
+            obj.dataToVisualise(obj.dataToVisualise > obj.maxValueToDisplay) = obj.maxValueToDisplay;
+            
+            cLims = [obj.minValueToDisplay obj.maxValueToDisplay];
             
             if(isempty(obj.imageHandle))
-                obj.imageHandle = imagesc(obj.data.imageData);
+                obj.imageHandle = imagesc(obj.axisHandle, 'CData', obj.dataToVisualise, cLims);
             else
 %                 set(obj.imageHandle, 'CData', obj.data.imageData);
-                obj.imageHandle = imagesc(obj.data.imageData);
+                obj.imageHandle = imagesc(obj.axisHandle, 'CData', obj.dataToVisualise, cLims);
             end
             
             set(obj.imageHandle, 'AlphaData', 1);
+%             
             
-            axis image;
             
             colormap(obj.axisHandle, obj.colourMap);
             set(obj.axisHandle, 'Visible', obj.axisVisibility);
             
             if(obj.colourBarOn)
-                colorbar;
+                colorbar(obj.axisHandle);
             else
-                colorbar('off');
+                colorbar(obj.axisHandle, 'off');
             end
             
             if(isa(obj.regionOfInterestList, 'RegionOfInterestList'))
@@ -234,13 +287,15 @@ classdef ImageDisplay < Display
     %                     set(obj.imageHandle, 'AlphaData', 0.5 / numel(roisToDisplay));
                     end
                     
-                    obj.imageHandle = imagesc(roiImage./max(roiImage(:)));
+                    obj.imageHandle = imagesc(obj.axisHandle, 'CData', roiImage./max(roiImage(:)));
                     set(obj.imageHandle, 'AlphaData', 0.5);
                     
                     hold(obj.axisHandle, 'off');
                 end
             end
                 
+            axis(obj.axisHandle, 'image', 'ij');
+            
             set(obj.imageHandle, 'ButtonDownFcn', @(src, evnt)obj.buttonDownCallback());
             
             % Reset necessary callbacks
