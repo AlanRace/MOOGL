@@ -498,6 +498,7 @@ classdef SpectrumDisplay < Display
         end
         
         function fixLimits(this)
+            
             if(isempty(this.xLimit))
                 if(isempty(min(this.data.spectralChannels)) || isempty(max(this.data.spectralChannels)))
                     this.xLimit = [0 1];
@@ -509,7 +510,12 @@ classdef SpectrumDisplay < Display
             if(isempty(this.yLimit))
                 currentViewMask = this.data.spectralChannels >= this.xLimit(1) & this.data.spectralChannels <= this.xLimit(2);
                 
-                this.yLimit = [min(this.data.intensities(currentViewMask)) max(this.data.intensities(currentViewMask))];
+                minVal = min(this.data.intensities(currentViewMask));
+                maxVal = max(this.data.intensities(currentViewMask));
+                
+                if(minVal < maxVal)
+                    this.yLimit = [minVal maxVal];
+                end
             end
         end
         
