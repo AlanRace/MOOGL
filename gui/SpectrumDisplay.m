@@ -247,7 +247,11 @@ classdef SpectrumDisplay < Display
             figure = Figure;
             figure.showStandardFigure();
             
+            set(figure.handle, 'Color', 'w');
+            
             spectrumPanel = SpectrumPanel(figure, obj.data);
+           
+            set(spectrumPanel.handle, 'BackgroundColor', 'w');
             
             display = spectrumPanel.spectrumDisplay;
             display.updateDisplay();

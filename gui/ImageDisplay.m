@@ -54,10 +54,15 @@ classdef ImageDisplay < Display
         function display = openInNewWindow(obj)
             figure = Figure;
             figure.showStandardFigure();
-%             axisHandle = axes;
+            figure.setTitle(['ImageDisplay: ' obj.data.description]);
+
             display = ImageDisplay(figure, obj.data);
             
             display.copy(obj);
+            
+            set(figure.handle, 'Color', [1 1 1])
+            t = title(display.axisHandle, obj.data.description);
+            set(t, 'Visible', 'on')
         end
         
         % Open a copy of the data in a new window so that if any changes
