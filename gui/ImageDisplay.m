@@ -246,6 +246,10 @@ classdef ImageDisplay < Display
             
             cLims = [obj.minValueToDisplay obj.maxValueToDisplay];
             
+            if(cLims == [0 0])
+                cLims = [0 1];
+            end
+            
             if(isempty(obj.imageHandle))
                 obj.imageHandle = imagesc(obj.axisHandle, 'CData', obj.dataToVisualise, cLims);
             else
