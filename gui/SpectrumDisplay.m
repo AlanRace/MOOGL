@@ -86,9 +86,10 @@ classdef SpectrumDisplay < Display
         end
         
         function addPeakDetectionMenu(obj, peakDetectionMethods, classNames)
-            % switchContinuousDisplay Toggle the display between continuous and discrete.
+            % addPeakDetectionMenu Add the peak detection menu with the
+            % specified methods.
             %
-            %   switchContinuousDisplay()
+            %   addPeakDetectionMenu()
             
             labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
             

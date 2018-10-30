@@ -5,8 +5,15 @@ classdef ImageDisplay < Display
         regionOfInterestList;
     end
     
+    properties (Constant)
+        defaultColourmap = Viridis;
+    end
+    
     properties (Access = protected)
-        colourMap = viridis(256);
+        
+        colourMap;
+        colourMapData;
+        
         axisVisibility = 'off';
         colourBarOn = 1;
         
@@ -14,6 +21,9 @@ classdef ImageDisplay < Display
         maxValueToDisplay = 1;
         
         equaliseHistogram = 0;
+        
+        colourMaps;
+        colourMapMenuItem;
         
         dataToVisualise;
     end
@@ -33,6 +43,7 @@ classdef ImageDisplay < Display
             
             obj.regionOfInterestList = RegionOfInterestList();
             
+            obj.setColourMap(ImageDisplay.defaultColourmap);
             obj.updateDisplay();
             
             addlistener(image, 'DataChanged', @(src, evnt)obj.updateDisplay());
@@ -102,7 +113,7 @@ classdef ImageDisplay < Display
 %                 export_fig(f, [pathName filesep fileName], '-painters', '-transparent');
 
                 newAxis = copyobj(obj.axisHandle, f);
-                colormap(f, obj.colourMap);
+                colormap(f, obj.colourMapData);
                 
                 
                 cb = colorbar(newAxis, 'southoutside');
@@ -186,6 +197,21 @@ classdef ImageDisplay < Display
         end
         
         function setColourMap(obj, colourMap)
+            if(isa(colourMap, 'Colourmap'))
+                obj.colourMapData = colourMap.getColourMap();
+                
+                % Ensure the correct colour map is denoted as selected
+                for i = 1:length(obj.colourMapMenuItem)
+                    if(strcmp(get(obj.colourMapMenuItem(i), 'Label'), colourMap.Name))
+                        set(obj.colourMapMenuItem(i), 'Checked', 'on');
+                    else
+                        set(obj.colourMapMenuItem(i), 'Checked', 'off');
+                    end
+                end
+            else
+                obj.colourMapData = obj.colourMap;
+            end
+            
             obj.colourMap = colourMap;
             
             obj.updateDisplay();
@@ -259,9 +285,11 @@ classdef ImageDisplay < Display
             
             set(obj.imageHandle, 'AlphaData', 1);
 %             
+            if(isempty(obj.colourMapData))
+                obj.colourMapData = obj.defaultColourmap.getColourMap();
+            end
             
-            
-            colormap(obj.axisHandle, obj.colourMap);
+            colormap(obj.axisHandle, obj.colourMapData);
             set(obj.axisHandle, 'Visible', obj.axisVisibility);
             
             if(obj.colourBarOn)
@@ -315,11 +343,39 @@ classdef ImageDisplay < Display
             % changed
             updateDisplay@Display(obj);
         end
+        
+        function createContextMenu(obj)
+            createContextMenu@Display(obj);
+            
+            uimenu(obj.exportMenu, 'Label', 'To CSV', 'Callback', @(src, evnt)obj.exportToCSV());
+            
+            % Checks if getSubclasses is on the path, if so likely to be
+            % SpectralAnalysis running, so add in the colour map menu
+            % automatically
+            if(exist('getSubclasses', 'file'))
+                [obj.colourMaps, classNames] = getSubclasses('Colourmap', 0);
+                
+                obj.addColourmapMenu(obj.colourMaps, classNames);
+            end
+        end
+        
+        function addColourmapMenu(obj, colourMaps, classNames)
+            % addColourmapMenu Toggle the display between continuous and discrete.
+            %
+            %   addColourmapMenu()
+            
+            labelPeaks = uimenu(obj.contextMenu, 'Label', 'Colourmaps', 'Separator', 'on');
+            
+            for i = 1:length(classNames)
+                obj.colourMapMenuItem(i) = uimenu(labelPeaks, 'Label', classNames{i}, 'Callback', @(src, evnt)obj.setColourMap(eval(colourMaps{i})));
+            end
+        end
     end
     
     methods (Access = protected)
         function copy(obj, oldobj)
-            obj.colourMap = oldobj.colourMap;
+            obj.setColourMap(oldobj.colourMap);
+            
             obj.axisVisibility = oldobj.axisVisibility;
             obj.colourBarOn = oldobj.colourBarOn;
             
