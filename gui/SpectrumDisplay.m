@@ -65,9 +65,9 @@ classdef SpectrumDisplay < Display
             % TODO: Have a better way of automatically adding the peak
             % picking menu, or move the menu elsewhere in the interface
             if(exist('getSubclasses', 'file'))
-                [peakDetectionMethods, classNames] = getSubclasses('SpectralPeakDetection', 1);
+                [obj.peakDetectionMethods, classNames] = getSubclasses('SpectralPeakDetection', 1);
                 
-                obj.addPeakDetectionMenu(peakDetectionMethods, classNames);
+                obj.addPeakDetectionMenu(classNames);
             end
             
             obj.continuousDisplay = uimenu(obj.contextMenu, 'Label', 'Continuous Display', 'Checked', 'on', 'Callback', @(src, evnt)obj.switchContinuousDisplay());
@@ -95,16 +95,14 @@ classdef SpectrumDisplay < Display
             this.updateDisplay();
         end
         
-        function addPeakDetectionMenu(obj, peakDetectionMethods, classNames)
+        function addPeakDetectionMenu(obj, classNames)
             % addPeakDetectionMenu Add the peak detection menu with the
             % specified methods.
             %
             %   addPeakDetectionMenu()
             
             labelPeaks = uimenu(obj.contextMenu, 'Label', 'Label Peaks', 'Separator', 'on');
-            
-            obj.peakDetectionMethods = peakDetectionMethods;
-            
+                        
             for i = 1:length(classNames)
                 obj.peakDetectionMenuItem(i) = uimenu(labelPeaks, 'Label', classNames{i}, 'Callback', @(src, evnt)obj.labelPeaksWithMethod(i));
             end
@@ -152,7 +150,8 @@ classdef SpectrumDisplay < Display
                     fclose(fid);
                 catch err
                     msgbox(err.message, err.identifier);
-                    err
+                    
+                    dbstack
                 end
             end
         end
@@ -196,7 +195,7 @@ classdef SpectrumDisplay < Display
             for i = 1:length(obj.peakDetectionMenuItem)
                 try
                     set(obj.peakDetectionMenuItem(i), 'Checked', 'off');
-                catch err
+                catch 
                     % Do nothing, happens if the peak detection menu item
                     % no longer exists
                 end
@@ -204,7 +203,7 @@ classdef SpectrumDisplay < Display
             
             try
                 set(obj.peakDetectionMenuItem(index), 'Checked', 'on');
-            catch err
+            catch
                 % Do nothing, happens if the peak detection menu item
                 % no longer exists
             end
@@ -320,6 +319,7 @@ classdef SpectrumDisplay < Display
         end
         
         function exportToLaTeX(obj)
+            %TODO
         end
         
         function updateDisplay(obj)            
@@ -331,17 +331,17 @@ classdef SpectrumDisplay < Display
             if(~isempty(obj.peakList))
                 indicies = obj.peakList >= obj.xLimit(1) & obj.peakList <= obj.xLimit(2);
                 
-                peakList = obj.peakList(indicies);
-                peakHeight = obj.peakHeight(indicies);
+                xData = obj.peakList(indicies);
+                yData = obj.peakHeight(indicies);
                 
                 yPos = ((obj.yLimit(2) - obj.yLimit(1)) * 0.95) + obj.yLimit(1);
                 
                 text(obj.xLimit(1), yPos, ['Detected peaks: ' num2str(length(obj.peakList))], 'Parent', obj.axisHandle);
                 
-                [m, indicies] = sort(peakHeight, 'descend');
+                [m, indicies] = sort(yData, 'descend');
                 
-                for i = 1:min(10, length(peakList))
-                    text(peakList(indicies(i)), peakHeight(indicies(i)), num2str(peakList(indicies(i))), 'Parent', obj.axisHandle);
+                for i = 1:min(10, length(xData))
+                    text(xData(indicies(i)), yData(indicies(i)), num2str(xData(indicies(i))), 'Parent', obj.axisHandle);
                 end
             end
                         
@@ -410,7 +410,6 @@ classdef SpectrumDisplay < Display
                         obj.deleteLine();
                         
                         xPoint = currentPoint(1, 1);
-                        yPoint = currentPoint(1, 2);
                         
                         obj.aboveAxis = 0;
                         
@@ -509,7 +508,7 @@ classdef SpectrumDisplay < Display
             if(~isempty(obj.currentLine))
                 try
                     delete(obj.currentLine);
-                catch err
+                catch 
                     warning('TODO: Handle error')
                 end
                 
