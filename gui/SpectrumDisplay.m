@@ -69,6 +69,12 @@ classdef SpectrumDisplay < Display
             obj.continuousDisplay = uimenu(obj.contextMenu, 'Label', 'Continuous Display', 'Checked', 'on', 'Callback', @(src, evnt)obj.switchContinuousDisplay());
         end
         
+        function setContinousDisplay(this, onoff)
+            set(this.continuousDisplay, 'Checked', onoff);
+            
+            this.updateDisplay();
+        end
+        
         function switchContinuousDisplay(this)
             % switchContinuousDisplay Toggle the display between continuous and discrete.
             %
@@ -155,16 +161,9 @@ classdef SpectrumDisplay < Display
                 obj.updatePeakDetection();
             end
             
-            %             if(~isempty(obj.peakDetectionMenuItem))
-            %                 peakDetectionMethod = 1;
-            %                 for i = 1:length(obj.peakDetectionMenuItem)
-            %                     if(strcmp(get(obj.peakDetectionMenuItem(i), 'Checked'), 'on'))
-            %                         peakDetectionMethod = i;
-            %                     end
-            %                 end
-            %
-            %                 obj.labelPeaksWithMethod(peakDetectionMethod);
-            %             end
+            if(~spectrum.isContinuous)
+                obj.setContinousDisplay('off');
+            end
         end
         
         function xLimit = getXLimit(obj)
