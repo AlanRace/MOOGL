@@ -6,7 +6,7 @@ classdef ImageDisplay < Display
     end
     
     properties (Access = protected)
-        colourMap = 'pink';
+        colourMap = viridis(256);
         axisVisibility = 'off';
         colourBarOn = 1;
         
