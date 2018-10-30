@@ -1,7 +1,9 @@
 classdef SpectrumDisplay < Display
+    % SpectrumDisplay handles displaying a spectrum, either continuous or
+    % centroided (displaying as a plot and bar chart respectively).
+    
     properties (SetAccess = protected)
-        % Handle for either the bar or line plot
-        plotHandle;
+        plotHandle; % Handle for either the bar or line plot
         
         peakList;
         peakDetails;
@@ -9,15 +11,15 @@ classdef SpectrumDisplay < Display
     end
     
     properties (Access = protected)
-        % Variable used to determine if we are in zoom mode
-        zoomingIn = 0;
-        aboveAxis = 0;
         
-        xLimit;
-        yLimit;
+        zoomingIn = 0; % Variable used to determine if we are in zoom mode
+        aboveAxis = 0; % Determines whether mouse was clicked above axis
         
-        startPoint;
-        currentPoint;
+        xLimit; % Display limit in x direction
+        yLimit; % Display limir in y direction
+        
+        startPoint; 
+        mouseLocation;
         currentLine;
         leftMouseDown = 0;
         
@@ -32,6 +34,8 @@ classdef SpectrumDisplay < Display
     end
     
     events
+        % PeakSelected is triggered when a peak has been selected within
+        % the display.
         PeakSelected;
     end
     
@@ -109,23 +113,28 @@ classdef SpectrumDisplay < Display
         end
         
         function exportToCSV(obj)
+            % exportToCSV exports the current data to a CSV file. If peak
+            % detection has been activated, then just the peaks are
+            % written out, otherwise the entire spectrum is written.
+            
             [FileName,PathName,FilterIndex] = uiputfile('*.csv', 'Save spectrum as', 'spectrum.csv');
             
+            % Check that the user has not cancelled
             if(FilterIndex == 1)
-                size(obj.peakList)
+                % Check whether peak detection has been performed
                 if(isempty(obj.peakList) || isempty(obj.peakHeight))
-                    peakList = obj.data.spectralChannels;
-                    peakHeight = obj.data.intensities;
+                    xToWrite = obj.data.spectralChannels;
+                    yToWrite = obj.data.intensities;
                 else
-                    peakList = obj.peakList;
-                    peakHeight = obj.peakHeight;
+                    xToWrite = obj.peakList;
+                    yToWrite = obj.peakHeight;
                 end
-                %                 size(peakList)
+                
                 try
+                    % Determine which decimal separator is used so that it
+                    % works with German separators
                     decimalSeparator = java.text.DecimalFormat().getDecimalFormatSymbols().getDecimalSeparator();
                     
-                    % Check to see if the computer is set to use German
-                    % deceimal separators
                     if(strcmp(decimalSeparator, ','))
                         decimalSeparator = ',';
                         csvSeparator = ';';
@@ -136,12 +145,11 @@ classdef SpectrumDisplay < Display
                     
                     fid = fopen([PathName filesep FileName], 'w');
                     
-                    for i = 1:length(peakList)
-                        fprintf(fid, strrep(strrep(sprintf('%0.10f%s%0.10f\n', peakList(i), '#', peakHeight(i)), '.', decimalSeparator), '#', csvSeparator));
+                    for i = 1:length(xToWrite)
+                        fprintf(fid, strrep(strrep(sprintf('%0.10f%s%0.10f\n', xToWrite(i), '#', yToWrite(i)), '.', decimalSeparator), '#', csvSeparator));
                     end
                     
                     fclose(fid);
-%                     dlmwrite([PathName filesep FileName], [peakList' peakHeight'], 'precision', 16);
                 catch err
                     msgbox(err.message, err.identifier);
                     err
@@ -278,6 +286,8 @@ classdef SpectrumDisplay < Display
         
         
         function exportToImage(obj)
+            % exportToImage exports a spectrum to a PDF image. 
+            
             [fileName, pathName, filterIndex] = uiputfile([obj.lastSavedPath 'spectrum.pdf'], 'Export image');
             
             if(filterIndex > 0)
@@ -287,15 +297,6 @@ classdef SpectrumDisplay < Display
                 axisHandle = axes;
                 normPos = get(axisHandle, 'Position');
                 delete(axisHandle);
-                %                 display = SpectrumDisplay(axisHandle, obj.data);
-                %
-                % %                 display.copy(obj);
-                %
-                %                 set(axisHandle, 'Color', 'none');
-                %                 set(f, 'Color', 'none');
-                %
-                %                 set(axisHandle, 'XLim', obj.xLimit);
-                %                 set(axisHandle, 'YLim', obj.yLimit);
                 
                 newAxis = copyobj(obj.axisHandle, f);
                 
@@ -311,13 +312,9 @@ classdef SpectrumDisplay < Display
                 set(f, 'PaperSize', [posOfFigure(3) posOfFigure(4)]);
                 set(f, 'PaperPosition', posOfFigure);
                 set(f, 'PaperPositionMode', 'manual');
-                %                 set(f, 'PaperOrientation', 'landscape');
                 
-                %                 get(f)
+                print(f, [pathName filesep fileName], '-dpdf', '-painters', '-r0');
                 
-                print(f, [pathName filesep fileName], '-dpdf', '-painters', '-r0');% test.pdf
-                
-                %                 export_fig(f, [pathName filesep fileName], '-painters', '-transparent');
                 delete(f);
             end
         end
@@ -325,17 +322,13 @@ classdef SpectrumDisplay < Display
         function exportToLaTeX(obj)
         end
         
-        function updateDisplay(obj)
-            %             xLimit = get(obj.axisHandle, 'xLim');
-            %             yLimit = get(obj.axisHandle, 'yLim');
-            
+        function updateDisplay(obj)            
             obj.plotSpectrum();
             
             obj.fixLimits();
             obj.updateLimits();
             
             if(~isempty(obj.peakList))
-                %                 if(xLimit ~= [0 1])
                 indicies = obj.peakList >= obj.xLimit(1) & obj.peakList <= obj.xLimit(2);
                 
                 peakList = obj.peakList(indicies);
@@ -344,14 +337,6 @@ classdef SpectrumDisplay < Display
                 yPos = ((obj.yLimit(2) - obj.yLimit(1)) * 0.95) + obj.yLimit(1);
                 
                 text(obj.xLimit(1), yPos, ['Detected peaks: ' num2str(length(obj.peakList))], 'Parent', obj.axisHandle);
-                %                 else
-                %                     peakList = obj.peakList;
-                %                     peakHeight = obj.peakHeight;
-                %
-                %                     yPos = ((max(obj.data.intensities) - min(obj.data.intensities)) * 0.95) + min(obj.data.intensities);
-                %
-                %                     text(min(obj.data.spectralChannels), yPos, ['Detected peaks: ' num2str(length(obj.peakList))], 'Parent', obj.axisHandle);
-                %                 end
                 
                 [m, indicies] = sort(peakHeight, 'descend');
                 
@@ -359,8 +344,7 @@ classdef SpectrumDisplay < Display
                     text(peakList(indicies(i)), peakHeight(indicies(i)), num2str(peakList(indicies(i))), 'Parent', obj.axisHandle);
                 end
             end
-            %            warning('TODO: Display any detected peaks avoiding textual overlap');
-            
+                        
             % Set up callback functions such as button down functions
             set(obj.plotHandle, 'ButtonDownFcn', @(src, evnt)obj.buttonDownCallback());
             set(obj.axisHandle, 'ButtonDownFcn', @(src, evnt)obj.buttonDownCallback());
@@ -376,39 +360,34 @@ classdef SpectrumDisplay < Display
         
         function mouseMovedCallback(obj)
             obj.deleteLine();
-            
-            %             xLimit = get(obj.axisHandle, 'XLim');
-            %             yLimit = get(obj.axisHandle, 'YLim');
-            
+                        
             if(obj.leftMouseDown)
                 axes(obj.axisHandle);
                 
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
-                obj.currentPoint = [currentPoint(1, 1) currentPoint(1, 2)];
+                obj.mouseLocation = [currentPoint(1, 1) currentPoint(1, 2)];
                 
                 if(obj.aboveAxis == 1 && obj.data.isContinuous)
-                    obj.currentLine = line([obj.startPoint(1) obj.currentPoint(1)], [obj.startPoint(2) obj.startPoint(2)], 'Color', [0 1 0]);
+                    obj.currentLine = line([obj.startPoint(1) obj.mouseLocation(1)], [obj.startPoint(2) obj.startPoint(2)], 'Color', [0 1 0]);
                 elseif(obj.zoomingIn == 2)
                     if(~isempty(obj.xLimit))
                         xMidPoint = ((obj.xLimit(2)-obj.xLimit(1))/2)+obj.xLimit(1);
-                        obj.currentLine = line([xMidPoint xMidPoint], [obj.startPoint(2) obj.currentPoint(2)], 'Color', [1 0 0]);
+                        obj.currentLine = line([xMidPoint xMidPoint], [obj.startPoint(2) obj.mouseLocation(2)], 'Color', [1 0 0]);
                     end
                 elseif(obj.zoomingIn == 1)
                     if(~isempty(obj.yLimit))
                         yMidPoint = ((obj.yLimit(2)-obj.yLimit(1))/2)+obj.yLimit(1);
-                        obj.currentLine = line([obj.startPoint(1) obj.currentPoint(1)], [yMidPoint yMidPoint], 'Color', [1 0 0]);
+                        obj.currentLine = line([obj.startPoint(1) obj.mouseLocation(1)], [yMidPoint yMidPoint], 'Color', [1 0 0]);
                     end
                 end
             end
         end
         
-        
-        
         function mouseButtonUpCallback(obj)
             obj.leftMouseDown = 0;
             
             if(~isempty(obj.startPoint))
-                isNotSamePoint = ~(isequal(obj.startPoint(1), obj.currentPoint(1)) && isequal(obj.startPoint(2), obj.currentPoint(2)));
+                isNotSamePoint = ~(isequal(obj.startPoint(1), obj.mouseLocation(1)) && isequal(obj.startPoint(2), obj.mouseLocation(2)));
                 
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 
@@ -418,20 +397,16 @@ classdef SpectrumDisplay < Display
                     isContinuous = true;
                 end
                 
-                if((~isNotSamePoint && obj.aboveAxis == 1 && ~isContinuous)) % || (~obj.data.isContinuous && obj.aboveAxis == 1))
+                if((~isNotSamePoint && obj.aboveAxis == 1 && ~isContinuous))
                     obj.mouseClickInsideAxis();
                     
                     [minVal, minLoc] = min(abs(obj.data.spectralChannels - currentPoint(1)));
                     minVal = obj.data.spectralChannels(minLoc);
                     
-                    peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, minVal); % currentPoint(1));
+                    peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Exact, minVal); 
                     notify(obj, 'PeakSelected', peakSelectionEvent);
-                    
-                    %                     mouseEvent = MouseEventData(MouseEventData.ButtonDown, obj.currentPoint(1), obj.currentPoint(2));
-                    %
-                    %                     notify(obj, 'MouseClickInsideAxis', mouseEvent);
                 else
-                    if(obj.aboveAxis ~= 0 && isNotSamePoint) % && obj.data.isContinuous)
+                    if(obj.aboveAxis ~= 0 && isNotSamePoint) 
                         obj.deleteLine();
                         
                         xPoint = currentPoint(1, 1);
@@ -444,24 +419,14 @@ classdef SpectrumDisplay < Display
                         
                         peakSelectionEvent = PeakSelectionEvent(PeakSelectionEvent.Range, peakRange);
                         notify(obj, 'PeakSelected', peakSelectionEvent);
-                        
-                        %                         mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
-                        %                         notify(obj, 'MouseUpInsideAxis', mouseEvent);
                     elseif(obj.zoomingIn ~= 0 && isNotSamePoint)
                         obj.deleteLine();
                         
-                        %                     xLimit = get(obj.axisHandle, 'XLim');
-                        %                     yLimit = get(obj.axisHandle, 'YLim');
-                        
                         if(obj.zoomingIn == 1)
-                            %                         set(obj.axisHandle, 'XLim', sort([obj.startPoint(1) obj.currentPoint(1)], 'ascend'));
-                            %                         set(obj.axisHandle, 'YLim', yLimit);
-                            obj.xLimit = sort([obj.startPoint(1) obj.currentPoint(1)], 'ascend');
+                            obj.xLimit = sort([obj.startPoint(1) obj.mouseLocation(1)], 'ascend');
                             obj.yLimit = [];
                         else
-                            %                         set(obj.axisHandle, 'YLim', sort([obj.startPoint(2) obj.currentPoint(2)], 'ascend'));
-                            %                         set(obj.axisHandle, 'XLim', xLimit);
-                            obj.yLimit = sort([obj.startPoint(2) obj.currentPoint(2)], 'ascend');
+                            obj.yLimit = sort([obj.startPoint(2) obj.mouseLocation(2)], 'ascend');
                         end
                         
                         obj.updateDisplay();
@@ -559,10 +524,7 @@ classdef SpectrumDisplay < Display
         
         function buttonDownCallback(obj)
             currentPoint = get(obj.axisHandle, 'CurrentPoint');
-            
-            %             xLimit = get(obj.axisHandle, 'xLim');
-            %             yLimit = get(obj.axisHandle, 'yLim');
-            
+                        
             xPoint = currentPoint(1, 1);
             yPoint = currentPoint(1, 2);
             
@@ -572,7 +534,7 @@ classdef SpectrumDisplay < Display
             
             if(strcmp(mouseClick, 'normal')) % Left click
                 obj.startPoint = [xPoint yPoint];
-                obj.currentPoint = obj.startPoint;
+                obj.mouseLocation = obj.startPoint;
                 obj.leftMouseDown = 1;
             end
             
@@ -582,10 +544,6 @@ classdef SpectrumDisplay < Display
                 if(strcmp(mouseClick, 'normal'))
                     obj.aboveAxis = 1;
                 end
-                
-                %                 mouseEvent = MouseEventData(MouseEventData.ButtonDown, xPoint, yPoint);
-                %
-                %                 notify(obj, 'MouseDownInsideAxis', mouseEvent);
             else
                 if(currentPoint(1, 1) < obj.xLimit(1))
                     obj.zoomingIn = 2;
@@ -597,12 +555,10 @@ classdef SpectrumDisplay < Display
                     obj.zoomingIn = 0;
                     
                     if(currentPoint(1, 1) < obj.xLimit(1))
-                        %                         ylim('auto');
                         currentIntensities = obj.data.intensities(obj.data.spectralChannels >= obj.xLimit(1) & obj.data.spectralChannels <= obj.xLimit(2));
                         obj.yLimit = [min(currentIntensities) max(currentIntensities)];
                     end
                     if(isempty(obj.yLimit) || currentPoint(2, 2) < obj.yLimit(1))
-                        %                         xlim('auto');
                         obj.xLimit = [min(obj.data.spectralChannels) max(obj.data.spectralChannels)];
                         obj.yLimit = [];
                     end
