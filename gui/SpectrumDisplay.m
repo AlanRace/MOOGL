@@ -367,7 +367,7 @@ classdef SpectrumDisplay < Display
                 currentPoint = get(obj.axisHandle, 'CurrentPoint');
                 obj.mouseLocation = [currentPoint(1, 1) currentPoint(1, 2)];
                 
-                if(obj.aboveAxis == 1 && obj.data.isContinuous)
+                if(obj.aboveAxis == 1)
                     obj.currentLine = line([obj.startPoint(1) obj.mouseLocation(1)], [obj.startPoint(2) obj.startPoint(2)], 'Color', [0 1 0]);
                 elseif(obj.zoomingIn == 2)
                     if(~isempty(obj.xLimit))
