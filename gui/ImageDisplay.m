@@ -289,6 +289,11 @@ classdef ImageDisplay < Display
                 obj.colourMapData = obj.defaultColourmap.getColourMap();
             end
             
+            if(isa(obj.colourMapData, 'Colourmap'))
+                obj.colourMapData = obj.colourMapData.getColourMap();
+            end
+            
+%             obj.colourMapData
             colormap(obj.axisHandle, obj.colourMapData);
             set(obj.axisHandle, 'Visible', obj.axisVisibility);
             
