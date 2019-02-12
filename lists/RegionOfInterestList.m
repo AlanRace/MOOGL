@@ -22,7 +22,7 @@ classdef RegionOfInterestList < DeepCopyList
             fprintf(fileID, '<regionOfInterestList>\n');
             
             for i = 1:numel(objects)
-                objects.outputXML(fileID, indent+1);
+                objects{i}.outputXML(fileID, indent+1);
             end
             
             XMLHelper.indent(fileID, indent);

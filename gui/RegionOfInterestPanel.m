@@ -14,6 +14,8 @@ classdef RegionOfInterestPanel < Panel
         roiListListener;
         
         imageForEditor;
+        
+        lastPath;
     end
     
     events
@@ -85,55 +87,103 @@ classdef RegionOfInterestPanel < Panel
         end
         
         function saveRegionOfInterest(this)
-            this.regionOfInterestList.get(1)
-            for i = this.selectedROIs
-                variableName = inputdlg(['Please specifiy a variable name for ' this.regionOfInterestList.get(i).name ':'], 'Variable name', 1, {'roi'});
-
-                while(~isempty(variableName))
-                    if(isvarname(variableName{1}))
-                        assignin('base', variableName{1}, this.regionOfInterestList.get(i));
-                        break;
-                    else
-                        variableName = inputdlg('Invalid variable name. Please specifiy a variable name:', 'Variable name', 1, variableName);
-                    end
-                end
+            % Get the fiter specification of the parser
+            filterSpec = {'*.rois', 'ROI List (*.rois)'};
+                       
+            % Show file select interface
+            [fileName, pathName, filterIndex] = uiputfile(filterSpec, 'Save ROI List', this.lastPath);
+            
+            % Check that the Open dialog was not cancelled
+            if(filterIndex > 0)
+                % Update the last path so that next time we open a file we
+                % start where we left off
+                this.lastPath = pathName;
+                
+                fid = fopen([pathName filesep fileName], 'w');
+                this.regionOfInterestList.outputXML(fid, 0);
+                fclose(fid);
             end
+%             this.regionOfInterestList.get(1)
+%             for i = this.selectedROIs
+%                 variableName = inputdlg(['Please specifiy a variable name for ' this.regionOfInterestList.get(i).name ':'], 'Variable name', 1, {'roi'});
+% 
+%                 while(~isempty(variableName))
+%                     if(isvarname(variableName{1}))
+%                         assignin('base', variableName{1}, this.regionOfInterestList.get(i));
+%                         break;
+%                     else
+%                         variableName = inputdlg('Invalid variable name. Please specifiy a variable name:', 'Variable name', 1, variableName);
+%                     end
+%                 end
+%             end
         end
         
         function loadRegionOfInterest(this)
-            variables = evalin('base', 'who');
-            rois = {};
+            filterSpec = {'*.rois', 'ROI List (*.rois)'};
+                       
+            % Show file select interface
+            [fileName, pathName, filterIndex] = uigetfile(filterSpec, 'Load ROI List', this.lastPath);
             
-            for i = 1:length(variables)
-                if(evalin('base', ['isa(' variables{i} ', ''RegionOfInterest'')']) || ...
-                        evalin('base', ['isa(' variables{i} ', ''RegionOfInterestList'')']))
+            % Check that the Open dialog was not cancelled
+            if(filterIndex > 0)
+                % Update the last path so that next time we open a file we
+                % start where we left off
+                this.lastPath = pathName;
                 
-                    rois{end+1} = variables{i};
-                end
+                regionOfInterestList = parseRegionOfInterestList([pathName filesep fileName]);
+                
+%                 if(regionOfInterestList.getSize() > 0)                
+%                     newROI = regionOfInterestList.get(1);
+%                     
+%                     if(newROI.width == size(this.imageForEditor, 2) && newROI.height == size(this.imageForEditor, 1))
+                        this.regionOfInterestList.addAll(regionOfInterestList);
+
+                        this.updateRegionOfInterestList();
+%                     else
+%                         roiListSize = ['(' num2str(size(this.imageForEditor, 2)) ', ' num2str(size(this.imageForEditor, 1)) ')'];
+%                         expectedSize = ['(' num2str(newROI.width) ', ' num2str(newROI.height) ')'];
+%                         
+%                         exception = MException('RegionOfInterestPanel:invalidROIList', ['ROIs are of a different size than expected ' expectedSize ' but got ' roiListSize] );
+%                         
+%                         % Make sure the user sees that we have had an error
+%                         errordlg(exception.message, exception.identifier);
+%                         throw(exception);
+%                     end
+%                 end
             end
-            
-            if(isempty(rois))
-                msgbox('No RegionOfInterest or RegionOfInterestList found in the workspace', 'No ROIs to load');
-            else
-                [selection, ok] = listdlg('PromptString', 'Select ROI(s)', ...
-                    'ListString', rois);
-
-                if(ok)
-                    for i = selection
-                        newROI = evalin('base', rois{i});
-
-                        if(isa(newROI, 'RegionOfInterest'))
-                            this.regionOfInterestList.add(newROI);
-                        elseif(isa(newROI, 'RegionOfInterestList'))
-                            for j = 1:newROI.getSize()
-                                this.regionOfInterestList.add(newROI.get(j));
-                            end
-                        end
-                    end
-
-                    this.updateRegionOfInterestList();
-                end
-            end
+%             variables = evalin('base', 'who');
+%             rois = {};
+%             
+%             for i = 1:length(variables)
+%                 if(evalin('base', ['isa(' variables{i} ', ''RegionOfInterest'')']) || ...
+%                         evalin('base', ['isa(' variables{i} ', ''RegionOfInterestList'')']))
+%                 
+%                     rois{end+1} = variables{i};
+%                 end
+%             end
+%             
+%             if(isempty(rois))
+%                 msgbox('No RegionOfInterest or RegionOfInterestList found in the workspace', 'No ROIs to load');
+%             else
+%                 [selection, ok] = listdlg('PromptString', 'Select ROI(s)', ...
+%                     'ListString', rois);
+% 
+%                 if(ok)
+%                     for i = selection
+%                         newROI = evalin('base', rois{i});
+% 
+%                         if(isa(newROI, 'RegionOfInterest'))
+%                             this.regionOfInterestList.add(newROI);
+%                         elseif(isa(newROI, 'RegionOfInterestList'))
+%                             for j = 1:newROI.getSize()
+%                                 this.regionOfInterestList.add(newROI.get(j));
+%                             end
+%                         end
+%                     end
+% 
+%                     this.updateRegionOfInterestList();
+%                 end
+%             end
         end
                 
         function updateRegionOfInterestList(this)

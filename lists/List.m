@@ -28,6 +28,23 @@ classdef List < Copyable
             end
         end
         
+        function addAll(obj, listToAdd)
+            objects = listToAdd.getObjects();
+            
+            for i = 1:length(objects)
+                objectToAdd = objects{i};
+                
+                % TODO: Avoid duplication of code?
+                if(isempty(obj.objects) || isempty(obj.objects{1}))
+                    obj.objects{1} = objectToAdd;
+                else
+                    obj.objects{end+1} = objectToAdd;
+                end
+            end
+            
+            notify(obj, 'ListChanged');
+        end
+        
         % Can't call this 'size' as it would interfere with MATLAB
         function numElements = getSize(obj)
             numElements = numel(obj.objects);

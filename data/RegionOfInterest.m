@@ -172,6 +172,7 @@ classdef RegionOfInterest < Copyable
                 fprintf(fileID, '<pixel x="%d" y="%d" />\n', pixels(i, 1), pixels(i, 2));
             end
             
+            XMLHelper.indent(fileID, indent+1);
             fprintf(fileID, '</pixelList>\n');
             
             XMLHelper.indent(fileID, indent);            
