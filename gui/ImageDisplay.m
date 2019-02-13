@@ -319,6 +319,7 @@ classdef ImageDisplay < Display
                     alphaChannel = zeros(size(obj.data.imageData));
                     
                     for i = 1:numel(roisToDisplay)
+%                         roisToDisplay{i}.getImage()
                         roiImage = roiImage + double(roisToDisplay{i}.getImage());
 
                         alphaChannel = alphaChannel + (sum(roiImage, 3) ~= 0);

@@ -15,6 +15,7 @@ classdef PixelSelectionPanel < handle
         CircleActive = 4;
         PolyActive = 5;
         EraserActive = 6;
+        MoveActive = 7;
     end
     
     properties (Access = private)
@@ -25,6 +26,7 @@ classdef PixelSelectionPanel < handle
         polyButton;
         eraserButton;
         thresholdButton;
+        moveButton;
         
         backgroundImageData;
         backgroundImage;
@@ -73,19 +75,21 @@ classdef PixelSelectionPanel < handle
             set(panel, 'Title', 'Select pixels');
             
             obj.pencilButton = uicontrol(panel, 'Style', 'togglebutton', 'String', 'Pencil', 'Value', 1, ...
-                'Units', 'normalized', 'Position', [0.075 0.825 0.12 0.15], 'Callback', @(src, evnt)obj.pencilButtonSelected());
+                'Units', 'normalized', 'Position', [0.06 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.pencilButtonSelected());
             obj.lineButton = uicontrol(panel, 'Style', 'togglebutton', 'String', 'Line', ...
-                'Units', 'normalized', 'Position', [0.2 0.825 0.12 0.15], 'Callback', @(src, evnt)obj.lineButtonSelected());
+                'Units', 'normalized', 'Position', [0.17 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.lineButtonSelected());
             obj.squareButton = uicontrol(panel, 'Style', 'togglebutton', 'String', 'Rectangle', ...
-                'Units', 'normalized', 'Position', [0.325 0.825 0.12 0.15], 'Callback', @(src, evnt)obj.squareButtonSelected());
+                'Units', 'normalized', 'Position', [0.28 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.squareButtonSelected());
             obj.circleButton = uicontrol(panel, 'Style', 'togglebutton', 'String', 'Ellipse', ...
-                'Units', 'normalized', 'Position', [0.45 0.825 0.12 0.15], 'Callback', @(src, evnt)obj.circleButtonSelected());
+                'Units', 'normalized', 'Position', [0.39 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.circleButtonSelected());
             obj.polyButton = uicontrol(panel, 'Style', 'togglebutton', 'String', 'Poly', ...
-                'Units', 'normalized', 'Position', [0.575 0.825 0.12 0.15], 'Callback', @(src, evnt)obj.polyButtonSelected());
+                'Units', 'normalized', 'Position', [0.50 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.polyButtonSelected());
             obj.eraserButton = uicontrol(panel, 'Style', 'togglebutton', 'String', 'Eraser', ...
-                'Units', 'normalized', 'Position', [0.7 0.825 0.12 0.15], 'Callback', @(src, evnt)obj.eraserButtonSelected());
+                'Units', 'normalized', 'Position', [0.61 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.eraserButtonSelected());
             obj.thresholdButton = uicontrol(panel, 'Style', 'pushbutton', 'String', 'Threshold', ...
-                'Units', 'normalized', 'Position', [0.825 0.825 0.12 0.15], 'Callback', @(src, evnt)obj.thresholdButtonSelected());
+                'Units', 'normalized', 'Position', [0.72 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.thresholdButtonSelected());
+            obj.moveButton = uicontrol(panel, 'Style', 'pushbutton', 'String', 'Move', ...
+                'Units', 'normalized', 'Position', [0.83 0.825 0.11 0.15], 'Callback', @(src, evnt)obj.moveButtonSelected());
             
             obj.axisHandle = axes('Parent', panel, 'Units', 'normalized', 'Position', [0.1 0.2 0.8 0.6]);
             
@@ -251,7 +255,34 @@ classdef PixelSelectionPanel < handle
                                 obj.shapeHandle = rectangle('Position', [startX, startY, rectWidth, rectHeight], ...
                                     'EdgeColor', [1 1 1], 'Curvature', [1 1]);
                             end
-                        end                        
+                        end   
+                    case PixelSelectionPanel.MoveActive
+                        if(currentPosition(1) ~= obj.lastPosition(1) || currentPosition(2) ~= obj.lastPosition(2))
+                            try
+                                if(obj.lastPosition(1) > currentPosition(1))
+                                    obj.regionOfInterest.shiftLeft(obj.lastPosition(1) - currentPosition(1));
+                                end
+                                if(currentPosition(1) > obj.lastPosition(1))
+                                    obj.regionOfInterest.shiftRight(currentPosition(1) - obj.lastPosition(1));
+                                end
+                                if(obj.lastPosition(2) > currentPosition(2))
+                                    obj.regionOfInterest.shiftUp(obj.lastPosition(2) - currentPosition(2));
+                                end
+                                if(currentPosition(2) > obj.lastPosition(2))
+                                    obj.regionOfInterest.shiftDown(currentPosition(2) - obj.lastPosition(2));
+                                end
+
+                                obj.displaySelectionData();
+                            catch err
+                                % If it is simply an out of bounds error
+                                % then we don't need to worry or warn the
+                                % user - they simply moved their mouse too
+                                % far to the right/bottom
+                                if(~strcmp(err.identifier, 'RegionOfInterest:InvalidArgument'))
+                                    rethrow(err);
+                                end
+                            end
+                        end
                 end
                 
                 obj.lastPosition = currentPosition;
@@ -499,6 +530,23 @@ classdef PixelSelectionPanel < handle
         
         function eraserButtonSelected(obj)
             obj.eraserActive = get(obj.eraserButton, 'Value');
+        end
+        
+        function setSingleButtonActive(obj, button)
+            set(obj.pencilButton, 'Value', 0);
+            set(obj.squareButton, 'Value', 0);
+            set(obj.lineButton, 'Value', 0);
+            set(obj.polyButton, 'Value', 0);
+            set(obj.circleButton, 'Value', 0);
+            set(obj.moveButton, 'Value', 0);
+            
+            set(button, 'Value', 1);
+        end
+        
+        function moveButtonSelected(obj)            
+            obj.setSingleButtonActive(obj.moveButton);
+            
+            obj.toolActive = PixelSelectionPanel.MoveActive;
         end
         
         function thresholdButtonSelected(this)
