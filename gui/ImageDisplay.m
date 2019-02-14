@@ -385,6 +385,8 @@ classdef ImageDisplay < Display
             obj.axisVisibility = oldobj.axisVisibility;
             obj.colourBarOn = oldobj.colourBarOn;
             
+            obj.regionOfInterestList = oldobj.regionOfInterestList;
+            
             obj.updateDisplay();
         end
         
