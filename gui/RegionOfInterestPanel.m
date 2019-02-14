@@ -7,6 +7,7 @@ classdef RegionOfInterestPanel < Panel
         saveRegionOfInterestButton;
         loadRegionOfInterestButton;
         infoRegionOfInterestButton;
+        % TODO: Evaluate whether this is necessary
         selectedROIs;
         
         regionOfInterestListEditor;
@@ -87,42 +88,105 @@ classdef RegionOfInterestPanel < Panel
         end
         
         function saveRegionOfInterest(this)
-            % Get the fiter specification of the parser
-            filterSpec = {'*.rois', 'ROI List (*.rois)'};
-                       
-            % Show file select interface
-            [fileName, pathName, filterIndex] = uiputfile(filterSpec, 'Save ROI List', this.lastPath);
+            list = {'Save list', 'Save selected', 'Save list individually (auto named)', 'Save selected individually (auto named)', ...
+                'Save list individually (manually named)', 'Save selected individually (manually named)'};
+            [savingOption, ok] = listdlg('ListString', list, 'SelectionMode', 'single', 'Name', 'Saving option', 'ListSize', [300, 160]);
             
-            % Check that the Open dialog was not cancelled
-            if(filterIndex > 0)
-                % Update the last path so that next time we open a file we
-                % start where we left off
-                this.lastPath = pathName;
+            
+            if(ok)
+                % Get selected ROIs
+                if(mod(savingOption, 2) == 0)
+                    selectedROIList = RegionOfInterestList();
+                    data = get(this.regionOfInterestTable, 'Data');
+                    this.selectedROIs
+                    selectedROIs = [data{:, 2}];
+                    
+                    for i = 1:length(selectedROIs)
+                        if(selectedROIs(i))
+                            selectedROIList.add(this.regionOfInterestList.get(i));
+                        end
+                    end
+                end
                 
-                fid = fopen([pathName filesep fileName], 'w');
-                this.regionOfInterestList.outputXML(fid, 0);
-                fclose(fid);
+                if(mod(savingOption, 2) == 1)
+                    listToProcess = this.regionOfInterestList;
+                else
+                    listToProcess = selectedROIList;
+                end
+                
+                if(savingOption == 1 || savingOption == 2)
+                    % Get the fiter specification of the parser
+                    filterSpec = {'*.rois', 'ROI List (*.rois)'};
+
+                    % Show file select interface
+                    [fileName, pathName, filterIndex] = uiputfile(filterSpec, 'Save ROI List', this.lastPath);
+
+                    % Check that the Open dialog was not cancelled
+                    if(filterIndex > 0)
+                        % Update the last path so that next time we open a file we
+                        % start where we left off
+                        this.lastPath = pathName;
+
+                        fid = fopen([pathName filesep fileName], 'w');
+                        listToProcess.outputXML(fid, 0);                        
+                        fclose(fid);
+                    end
+                elseif(savingOption == 3 || savingOption == 4)
+                    selectedPath = uigetdir(this.lastPath, 'Save ROIs');
+                    
+                    if(selectedPath ~= 0)
+                        for i = 1:listToProcess.getSize()
+                            roi = listToProcess.get(i);
+                            
+                            filename = [selectedPath filesep roi.getName() '.roi'];
+                            count = 2;
+                            while(exist(filename, 'file'))
+                                filename = [selectedPath filesep roi.getName() '_' num2str(count) '.roi'];
+                                count = count + 1;
+                            end
+                            
+                            fid = fopen(filename, 'w');
+                            roi.outputXML(fid, 0);                        
+                            fclose(fid);
+                        end
+                    end
+                elseif(savingOption == 5 || savingOption == 6)
+                    % Get the fiter specification of the parser
+                    filterSpec = {'*.roi', 'ROI (*.roi)'};
+                    
+                    for i = 1:listToProcess.getSize()
+                        roi = listToProcess.get(i);
+                        
+                        filename = [this.lastPath filesep roi.getName() '.roi'];
+                        count = 2;
+                        while(exist(filename, 'file'))
+                            filename = [this.lastPath filesep roi.getName() '_' num2str(count) '.roi'];
+                            count = count + 1;
+                        end
+
+                        % Show file select interface
+                        [fileName, pathName, filterIndex] = uiputfile(filterSpec, 'Save ROI', filename);
+
+                        % Check that the Open dialog was not cancelled
+                        if(filterIndex > 0)
+                            % Update the last path so that next time we open a file we
+                            % start where we left off
+                            this.lastPath = pathName;
+                            
+                            fid = fopen([pathName filesep fileName], 'w');
+                            roi.outputXML(fid, 0);                        
+                            fclose(fid);
+                        end
+                    end
+                end
             end
-%             this.regionOfInterestList.get(1)
-%             for i = this.selectedROIs
-%                 variableName = inputdlg(['Please specifiy a variable name for ' this.regionOfInterestList.get(i).name ':'], 'Variable name', 1, {'roi'});
-% 
-%                 while(~isempty(variableName))
-%                     if(isvarname(variableName{1}))
-%                         assignin('base', variableName{1}, this.regionOfInterestList.get(i));
-%                         break;
-%                     else
-%                         variableName = inputdlg('Invalid variable name. Please specifiy a variable name:', 'Variable name', 1, variableName);
-%                     end
-%                 end
-%             end
         end
         
         function loadRegionOfInterest(this)
-            filterSpec = {'*.rois', 'ROI List (*.rois)'};
+            filterSpec = {'*.roi;*.rois', 'ROI (List) (*.roi,*.rois)'};
                        
             % Show file select interface
-            [fileName, pathName, filterIndex] = uigetfile(filterSpec, 'Load ROI List', this.lastPath);
+            [fileName, pathName, filterIndex] = uigetfile(filterSpec, 'Load ROI List', this.lastPath, 'MultiSelect', 'on')
             
             % Check that the Open dialog was not cancelled
             if(filterIndex > 0)
@@ -130,15 +194,35 @@ classdef RegionOfInterestPanel < Panel
                 % start where we left off
                 this.lastPath = pathName;
                 
-                regionOfInterestList = parseRegionOfInterestList([pathName filesep fileName]);
+                if(~iscell(fileName))
+                    filenames{1} = fileName;
+                else
+                    filenames = fileName;
+                end
+                
+                for fileIndex = 1:numel(filenames) 
+                    currentFileName = filenames{fileIndex}
+                    
+                    [fp, name, ext] = fileparts(currentFileName);
+
+                    if(strcmp(ext, '.rois'))
+                        regionOfInterestList = parseRegionOfInterestList([pathName filesep currentFileName]);
+                        this.regionOfInterestList.addAll(regionOfInterestList);
+                    else
+                        regionOfInterest = parseRegionOfInterest([pathName filesep currentFileName]);
+                        this.regionOfInterestList.add(regionOfInterest);
+                    end
+
+                    this.updateRegionOfInterestList();
+                end
                 
 %                 if(regionOfInterestList.getSize() > 0)                
 %                     newROI = regionOfInterestList.get(1);
 %                     
 %                     if(newROI.width == size(this.imageForEditor, 2) && newROI.height == size(this.imageForEditor, 1))
-                        this.regionOfInterestList.addAll(regionOfInterestList);
+                        
 
-                        this.updateRegionOfInterestList();
+                        
 %                     else
 %                         roiListSize = ['(' num2str(size(this.imageForEditor, 2)) ', ' num2str(size(this.imageForEditor, 1)) ')'];
 %                         expectedSize = ['(' num2str(newROI.width) ', ' num2str(newROI.height) ')'];
@@ -151,39 +235,6 @@ classdef RegionOfInterestPanel < Panel
 %                     end
 %                 end
             end
-%             variables = evalin('base', 'who');
-%             rois = {};
-%             
-%             for i = 1:length(variables)
-%                 if(evalin('base', ['isa(' variables{i} ', ''RegionOfInterest'')']) || ...
-%                         evalin('base', ['isa(' variables{i} ', ''RegionOfInterestList'')']))
-%                 
-%                     rois{end+1} = variables{i};
-%                 end
-%             end
-%             
-%             if(isempty(rois))
-%                 msgbox('No RegionOfInterest or RegionOfInterestList found in the workspace', 'No ROIs to load');
-%             else
-%                 [selection, ok] = listdlg('PromptString', 'Select ROI(s)', ...
-%                     'ListString', rois);
-% 
-%                 if(ok)
-%                     for i = selection
-%                         newROI = evalin('base', rois{i});
-% 
-%                         if(isa(newROI, 'RegionOfInterest'))
-%                             this.regionOfInterestList.add(newROI);
-%                         elseif(isa(newROI, 'RegionOfInterestList'))
-%                             for j = 1:newROI.getSize()
-%                                 this.regionOfInterestList.add(newROI.get(j));
-%                             end
-%                         end
-%                     end
-% 
-%                     this.updateRegionOfInterestList();
-%                 end
-%             end
         end
                 
         function updateRegionOfInterestList(this)
