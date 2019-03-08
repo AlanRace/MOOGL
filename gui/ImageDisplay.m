@@ -57,6 +57,8 @@ classdef ImageDisplay < Display
                 this.minValueToDisplay = 0;
             end
             
+            title(this.axisHandle, data.description);
+            
             setData@Display(this, data);
         end
         
@@ -86,6 +88,10 @@ classdef ImageDisplay < Display
             display = ImageDisplay(figure, Image(obj.data.imageData));
             
             display.copy(obj);
+        end
+        
+        function exportToImageFile(this, filename)
+            print(this.parent.getParentFigure().handle, filename, '-dpng', '-painters', '-r600');
         end
         
         function exportToImage(obj)
