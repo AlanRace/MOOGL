@@ -112,6 +112,12 @@ classdef RegionOfInterest < Copyable
             end
         end
         
+        function invert(this)
+            this.pixelSelection = ~this.pixelSelection;
+            
+            this.notify('PixelSelectionChanged');
+        end
+        
         function shiftLeft(this, distance)
             maxDistance = find(sum(this.pixelSelection, 1) > 0, 1, 'first');
             newPos = maxDistance - distance;
