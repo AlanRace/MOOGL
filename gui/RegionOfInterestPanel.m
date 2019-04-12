@@ -90,6 +90,12 @@ classdef RegionOfInterestPanel < Panel
         function saveRegionOfInterest(this)
             list = {'Save list', 'Save selected', 'Save list individually (auto named)', 'Save selected individually (auto named)', ...
                 'Save list individually (manually named)', 'Save selected individually (manually named)'};
+            
+            if(~isdeployed())
+                list{end+1} = 'Save list to workspace';
+                list{end+1} = 'Save selected to workspace';
+            end            
+            
             [savingOption, ok] = listdlg('ListString', list, 'SelectionMode', 'single', 'Name', 'Saving option', 'ListSize', [300, 160]);
             
             
@@ -177,6 +183,12 @@ classdef RegionOfInterestPanel < Panel
                             roi.outputXML(fid, 0);                        
                             fclose(fid);
                         end
+                    end
+                elseif(savingOption == 7 || savingOption == 8)
+                    variableName = requestVariableName('Variable name for ROI list', 'Save ROI list to workspace');
+                    
+                    if(~isempty(variableName))
+                        assignin('base', variableName, listToProcess);
                     end
                 end
             end
