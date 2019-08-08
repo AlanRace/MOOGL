@@ -176,7 +176,6 @@ classdef ImageDisplay < Display
             maxVal = max(0, max(this.data.imageData(:)));
             
             %             scale = (maxVal - minVal) / 64;
-            
             scaleSize = 256;
             zeroLoc = round((abs(minVal) / (maxVal - minVal)) * scaleSize);
             
@@ -215,10 +214,10 @@ classdef ImageDisplay < Display
                     end
                 end
             else
-                obj.colourMapData = obj.colourMap;
+                obj.colourMapData = colourMap;
             end
             
-            obj.colourMap = colourMap;
+%             obj.colourMap = colourMap;
             
             obj.updateDisplay();
         end
