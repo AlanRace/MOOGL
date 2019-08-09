@@ -35,6 +35,14 @@ classdef RegionOfInterestPanel < Panel
             this.imageForEditor = Image(1);
         end
         
+        function addRegionOfInterest(this, regionOfInterest)
+            this.regionOfInterestList.add(regionOfInterest);
+        end
+        
+        function addRegionOfInterestList(this, regionOfInterestList)
+            this.regionOfInterestList.addAll(regionOfInterestList);
+            this.updateRegionOfInterestList();
+        end
         
         function setRegionOfInterestList(this, regionOfInterestList)
             this.regionOfInterestList = regionOfInterestList;
