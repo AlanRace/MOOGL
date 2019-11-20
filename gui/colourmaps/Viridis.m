@@ -10,7 +10,7 @@ classdef Viridis < Colourmap
             else
                 hsv = rgb2hsv(Viridis.colourMap);
 
-                linspace(0, 1, size(Viridis.colourMap, 1))
+                linspace(0, 1, size(Viridis.colourMap, 1));
                 colourMap = interp1(linspace(0, 1, size(Viridis.colourMap, 1)),hsv,linspace(0, 1, colourmapSize));
                 colourMap = hsv2rgb(colourMap);
             end
