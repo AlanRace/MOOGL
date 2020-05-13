@@ -325,7 +325,22 @@ classdef ImageDisplay < Display
                     
                     for i = 1:numel(roisToDisplay)
 %                         roisToDisplay{i}.getImage()
-                        roiImage = roiImage + double(roisToDisplay{i}.getImage());
+                        currentROIImage = roisToDisplay{i}.getImage();
+                        if size(currentROIImage, 1) < size(roiImage, 1)
+                            currentROIImage(size(roiImage, 1), 1, :) = 0;
+                        end
+                        if size(currentROIImage, 2) < size(roiImage, 2)
+                            size(roiImage, 2)
+                            currentROIImage(1, size(roiImage, 2), :) = 0;
+                        end
+                        if size(currentROIImage, 1) > size(roiImage, 1)
+                            currentROIImage = currentROIImage(1:size(roiImage, 1), :, :);
+                        end
+                        if size(currentROIImage, 2) > size(roiImage, 2)
+                            currentROIImage = currentROIImage(:, 1:size(roiImage, 2), :);
+                        end
+
+                        roiImage = roiImage + double(currentROIImage);
 
                         alphaChannel = alphaChannel + (sum(roiImage, 3) ~= 0);
     %                     roiImage = (roiImage ./ 255);
