@@ -3,6 +3,8 @@ classdef ImageDisplay < Display
         imageHandle;
         
         regionOfInterestList;
+        
+        isDiverging = false;
     end
     
     properties (Constant)
@@ -172,6 +174,8 @@ classdef ImageDisplay < Display
         end
         
         function setDivergingColourMap(this)
+            this.isDiverging = true;
+            
             minVal = min(0, min(this.data.imageData(:)));
             maxVal = max(0, max(this.data.imageData(:)));
             
@@ -406,6 +410,10 @@ classdef ImageDisplay < Display
             obj.colourBarOn = oldobj.colourBarOn;
             
             obj.regionOfInterestList = oldobj.regionOfInterestList;
+            
+            if(oldobj.isDiverging)
+                obj.setDivergingColourMap()
+            end
             
             obj.updateDisplay();
         end
