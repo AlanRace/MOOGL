@@ -3,6 +3,7 @@ classdef Figure < Container
     
     properties (SetAccess = protected)
         toolbarHandle;
+        
     end
     
     events

@@ -4,6 +4,9 @@ classdef Container < handle
         % MATLAB figure handle
         handle = [];
         
+        buttonColour = [36 160 237]./255;%[0.8 0.8 0.8]; % get(obj.spectrumPreprocessingLabel, 'BackgroundColor')
+        iconColour = [1 1 1];
+        
         parent;
     end
     
