@@ -31,6 +31,9 @@ classdef SpectrumDisplay < Display
         peakFilterListEditor;
         
         continuousDisplay;
+        
+        xLabel;
+        yLabel;
     end
     
     events
@@ -52,6 +55,13 @@ classdef SpectrumDisplay < Display
             addlistener(parent, 'ButtonDown', @(src, evnt)obj.buttonDownCallback());
             addlistener(parent, 'ButtonMotion', @(src,evnt)obj.mouseMovedCallback());
             addlistener(parent, 'ButtonUp', @(src, evnt)obj.mouseButtonUpCallback());
+        end
+        
+        function setLabels(this, xLabel, yLabel) 
+            this.xLabel = xLabel;
+            this.yLabel = yLabel;
+            
+            this.updateDisplay();
         end
         
         function createContextMenu(obj)
@@ -459,6 +469,9 @@ classdef SpectrumDisplay < Display
             else
                 this.plotHandle = plot(this.axisHandle, this.data.spectralChannels, this.data.intensities);
             end
+            
+            xlabel(this.xLabel);
+            ylabel(this.yLabel);
         end
         
         function fixLimits(this)
