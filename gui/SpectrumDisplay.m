@@ -470,8 +470,8 @@ classdef SpectrumDisplay < Display
                 this.plotHandle = plot(this.axisHandle, this.data.spectralChannels, this.data.intensities);
             end
             
-            xlabel(this.xLabel);
-            ylabel(this.yLabel);
+            xlabel(this.axisHandle, this.xLabel);
+            ylabel(this.axisHandle, this.yLabel);
         end
         
         function fixLimits(this)
