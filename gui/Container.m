@@ -7,6 +7,15 @@ classdef Container < handle
         buttonColour = [36 160 237]./255;%[0.8 0.8 0.8]; % get(obj.spectrumPreprocessingLabel, 'BackgroundColor')
         iconColour = [1 1 1];
         
+        defaultMargin = 5;
+        
+        defaultLabelSize = 28;
+        defaultButtonSize = 28;
+        defaultEditBoxSize = 24;
+        defaultSelectBoxSize = 24;
+        
+        defaultColourBarSize = 80;
+        
         parent;
     end
     
